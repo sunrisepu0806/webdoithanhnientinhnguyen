@@ -208,7 +208,7 @@ export default function ThanhDieuHuong() {
 
           <div className="pt-6 border-t border-slate-100 text-center space-y-2">
             <p className="text-xs font-semibold text-slate-600">
-              Đoàn TNCS Hồ Chí Minh • Trường Đại học Quy Nhơn
+              Trường Đại học Quy Nhơn
             </p>
           </div>
         </div>

@@ -8,11 +8,9 @@ const quickLinks = [
   { name: 'Trang chủ', href: '/' },
   { name: 'Giới thiệu', href: '/gioi-thieu' },
   { name: 'Hoạt động', href: '/hoat-dong' },
-  
 ];
 
 const joinLinks = [
-
   { name: 'Tra cứu ', href: '/tracuudiemdanh' },
 ];
 
@@ -47,7 +45,7 @@ export default function ChanTrang() {
             </Link>
 
             <p className="text-xs text-slate-300 italic">
-             Kết nối sức trẻ – Lan tỏa yêu thương
+              Kết nối sức trẻ – Lan tỏa yêu thương
             </p>
 
             <div className="pt-2">
@@ -82,7 +80,7 @@ export default function ChanTrang() {
                   href="mailto:doithanhnientinhnguyenqnu23@gmail.com"
                   className="hover:text-blue-300 transition-colors truncate"
                 >
-                  doithanhnientinhnguyenqnu23@gmail.com
+                  doitntnqnu2023@gmail.com
                 </a>
               </p>
               <p className="flex items-center gap-2.5">
@@ -91,7 +89,7 @@ export default function ChanTrang() {
                   href="tel:0376217236"
                   className="hover:text-blue-300 transition-colors"
                 >
-                  0376217236 (Ban cán sự)
+                  0376217236 (Đỗ Minh Tú)
                 </a>
               </p>
             </div>
@@ -141,9 +139,20 @@ export default function ChanTrang() {
 
         </div>
 
-        {/* Bản quyền */}
-        <div className="pt-6 text-center text-[11px] text-slate-400">
+        {/* Bản quyền & Tác giả */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
           <p>© 2026 Đội Thanh Niên Tình Nguyện QNU. All rights reserved.</p>
+          <p className="flex items-center gap-1">
+            <span>Developed by</span>
+            <a
+              href="https://www.facebook.com/pupipupipupi08"
+              target="_blank"
+              rel="noreferrer"
+              className="text-slate-300 hover:text-blue-400 font-medium transition-colors underline-offset-2 hover:underline"
+            >
+              obi.pu08
+            </a>
+          </p>
         </div>
       </div>
     </footer>
