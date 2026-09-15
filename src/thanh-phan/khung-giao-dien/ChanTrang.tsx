@@ -150,7 +150,7 @@ export default function ChanTrang() {
               rel="noreferrer"
               className="text-slate-300 hover:text-blue-400 font-medium transition-colors underline-offset-2 hover:underline"
             >
-              obi.pu08
+              obi.phu08
             </a>
           </p>
         </div>

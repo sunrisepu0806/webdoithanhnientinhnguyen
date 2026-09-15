@@ -38,7 +38,70 @@ export interface FormQuestion {
   maxSelect?: number;
 }
 
+const DANH_SACH_NGANH = [
+  "Quản lý Giáo dục",
+  "Giáo dục mầm non",
+  "Giáo dục Tiểu học",
+  "Giáo dục chính trị",
+  "Giáo dục thể chất",
+  "Sư phạm Toán học",
+  "Sư phạm Tin học",
+  "Sư phạm Vật lý",
+  "Sư phạm Hoá học",
+  "Sư phạm Sinh học",
+  "Sư phạm Ngữ văn",
+  "Sư phạm Lịch sử",
+  "Sư phạm Địa lý",
+  "Sư phạm Tiếng Anh",
+  "Sư phạm Khoa học tự nhiên",
+  "Sư phạm Lịch sử Địa lý",
+  "Ngôn ngữ Anh",
+  "Ngôn ngữ Trung Quốc",
+  "Văn học",
+  "Kinh tế",
+  "Quản lý nhà nước",
+  "Tâm lý học giáo dục",
+  "Đông phương học",
+  "Việt Nam học",
+  "Quản trị kinh doanh",
+  "Tài chính - Ngân hàng",
+  "Kế toán",
+  "Kiểm toán",
+  "Luật",
+  "Hóa học",
+  "Khoa học dữ liệu",
+  "Toán ứng dụng",
+  "Kỹ thuật phần mềm",
+  "Trí tuệ nhân tạo",
+  "Công nghệ thông tin",
+  "Công nghệ kỹ thuật ô tô",
+  "Công nghệ kỹ thuật hoá học",
+  "Logistics và Quản lý chuỗi cung ứng",
+  "Kỹ thuật cơ khí động lực",
+  "Kỹ thuật điện",
+  "Kỹ thuật điện tử - viễn thông",
+  "Kỹ thuật điều khiển và Tự động hóa",
+  "Vật lý kỹ thuật",
+  "Công nghệ thực phẩm",
+  "Kỹ thuật xây dựng",
+  "Nông học",
+  "Công tác xã hội",
+  "Quản trị dịch vụ du lịch và lữ hành",
+  "Quản trị khách sạn",
+  "Quản lý tài nguyên và môi trường",
+  "Quản lý đất đai"
+];
+
 const cleanId = (val: any) => String(val || '').trim().toLowerCase();
+
+// Chuẩn hóa tên Tổ
+const formatToName = (toData: any): string => {
+  if (!toData) return 'TNV';
+  const str = String(toData).trim().toLowerCase();
+  if (str === 'tnv' || str === '' || str === 'tự do' || str === 'tu do') return 'TNV';
+  const match = str.match(/\d+/);
+  return match ? `Tổ ${match[0]}` : str.toUpperCase();
+};
 
 export default function FormDangKyChiTietPage() {
   const params = useParams();
@@ -49,18 +112,17 @@ export default function FormDangKyChiTietPage() {
   const [currentRegisteredCount, setCurrentRegisteredCount] = useState<number>(0);
   const [loadingActivity, setLoadingActivity] = useState(true);
 
-  // Form State - Mặc định group là 'Tổ 6'
-  const [fullName, setFullName] = useState('');
+  // Form State
   const [mssv, setMssv] = useState('');
-  const [major, setMajor] = useState('');
-  const [group, setGroup] = useState('Tổ 6');
-  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [selectedMajor, setSelectedMajor] = useState('');
+  const [cohortNumber, setCohortNumber] = useState('48');
+  const [group, setGroup] = useState('TNV');
   const [dob, setDob] = useState('');
   const [answers, setAnswers] = useState<{ [key: string]: any }>({});
 
-  // Trạng thái kiểm tra MSSV trong database
   const [isMemberExists, setIsMemberExists] = useState(false);
-
+  const [isFetchingInfo, setIsFetchingInfo] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -129,7 +191,7 @@ export default function FormDangKyChiTietPage() {
     };
   }, []);
 
-  // Lấy thông tin hoạt động từ Firebase
+  // Tải chi tiết hoạt động
   useEffect(() => {
     if (!activityId) return;
 
@@ -182,66 +244,162 @@ export default function FormDangKyChiTietPage() {
     fetchRegisteredCount();
   }, [activityId]);
 
-  // Kiểm tra MSSV tồn tại để tự điền & khóa trường
+  // Phân tích chuỗi ngành và khóa khi nhận diện thành viên cũ
+  const parseMajorAndCohort = (rawMajorStr: string) => {
+    if (!rawMajorStr) return;
+    const str = rawMajorStr.trim();
+    
+    // Tìm khóa K (ví dụ K47, K48)
+    const cohortMatch = str.match(/k(\d{1,2})/i);
+    if (cohortMatch && cohortMatch[1]) {
+      setCohortNumber(cohortMatch[1]);
+    }
+
+    // Tìm tên ngành trong danh sách
+    const matchedMajor = DANH_SACH_NGANH.find((m) => str.toLowerCase().includes(m.toLowerCase()));
+    if (matchedMajor) {
+      setSelectedMajor(matchedMajor);
+    } else {
+      const cleanMajorOnly = str.replace(/k\d{1,2}/gi, '').replace(/[-–]/g, '').trim();
+      setSelectedMajor(cleanMajorOnly || str);
+    }
+  };
+
+  // HÀM TÌM KIẾM THÔNG TIN THÀNH VIÊN TỰ ĐỘNG
   const autoFetchMemberInfo = async (inputMssv: string) => {
-    const cleanInputSid = cleanId(inputMssv);
-    if (!cleanInputSid || cleanInputSid.length < 4) {
+    const rawVal = inputMssv.trim();
+    const cleanInputSid = cleanId(rawVal);
+
+    if (!cleanInputSid || cleanInputSid.length < 5) {
       setIsMemberExists(false);
-      setGroup('Tổ 6');
+      setGroup('TNV');
       return;
     }
 
     try {
-      // 1. Tìm trong collection members
-      const memberSnap = await getDocs(collection(db, 'members'));
-      const foundMember = memberSnap.docs.find((d) => {
-        const data = d.data();
-        const sid = cleanId(data.studentId || data.msv || data.studentCode || data.mssv);
-        return sid === cleanInputSid;
-      });
+      setIsFetchingInfo(true);
 
-      if (foundMember) {
-        const data = foundMember.data();
-        setFullName(data.fullName || data.hoTen || data.name || '');
-        setMajor(data.major || data.nganhHoc || data.lop || '');
-        setGroup(String(data.group || data.to || 'Tổ 6'));
-        setDob(String(data.dob || data.ngaySinh || ''));
-        if (data.phone || data.soDienThoai) setPhone(String(data.phone || data.soDienThoai));
+      // --- BƯỚC 1: Tìm trong collection 'users' ---
+      const userDirectRef = doc(db, 'users', cleanInputSid);
+      const userDirectSnap = await getDoc(userDirectRef);
+
+      if (userDirectSnap.exists()) {
+        const data = userDirectSnap.data();
+        setFullName(data.name || data.fullName || data.hoTen || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || data.nganhHoc || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
         setIsMemberExists(true);
         return;
       }
 
-      // 2. Tìm trong danh sách đăng ký trước đó
-      const regSnap = await getDocs(collection(db, 'activity_registrations'));
-      const foundReg = regSnap.docs.find((d) => {
-        const data = d.data();
-        const sid = cleanId(data.studentId || data.mssv);
-        return sid === cleanInputSid;
-      });
+      const userQueryMssv = query(collection(db, 'users'), where('mssv', '==', rawVal));
+      const userSnapMssv = await getDocs(userQueryMssv);
 
-      if (foundReg) {
-        const data = foundReg.data();
-        setFullName(data.fullName || data.hoTen || '');
-        setMajor(data.major || data.lopKhoa || '');
-        setGroup(String(data.group || data.to || 'Tổ 6'));
-        setDob(String(data.dob || ''));
-        if (data.phone || data.soDienThoai) setPhone(String(data.phone || data.soDienThoai));
+      if (!userSnapMssv.empty) {
+        const data = userSnapMssv.docs[0].data();
+        setFullName(data.name || data.fullName || data.hoTen || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || data.nganhHoc || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
         setIsMemberExists(true);
         return;
       }
 
-      // Chưa có trong hệ thống => Mở khóa cho nhập mới và giữ nguyên mặc định Tổ 6
+      const userQuerySid = query(collection(db, 'users'), where('studentId', '==', rawVal));
+      const userSnapSid = await getDocs(userQuerySid);
+
+      if (!userSnapSid.empty) {
+        const data = userSnapSid.docs[0].data();
+        setFullName(data.name || data.fullName || data.hoTen || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || data.nganhHoc || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
+        setIsMemberExists(true);
+        return;
+      }
+
+      // --- BƯỚC 2: Dự phòng tìm trong 'members' ---
+      const memberQ = query(collection(db, 'members'), where('mssv', '==', rawVal));
+      const memberSnap = await getDocs(memberQ);
+
+      if (!memberSnap.empty) {
+        const data = memberSnap.docs[0].data();
+        setFullName(data.name || data.fullName || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
+        setIsMemberExists(true);
+        return;
+      }
+
+      const directRef = doc(db, 'members', cleanInputSid);
+      const directSnap = await getDoc(directRef);
+
+      if (directSnap.exists()) {
+        const data = directSnap.data();
+        setFullName(data.name || data.fullName || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
+        setIsMemberExists(true);
+        return;
+      }
+
+      const memDocRef = doc(db, 'members', `mem_${cleanInputSid}`);
+      const memDocSnap = await getDoc(memDocRef);
+
+      if (memDocSnap.exists()) {
+        const data = memDocSnap.data();
+        setFullName(data.name || data.fullName || '');
+        parseMajorAndCohort(data.majorAndClass || data.major || '');
+        setGroup(formatToName(data.to_id || data.group || data.to));
+        setDob(data.ngaySinh || data.dob || '');
+        setIsMemberExists(true);
+        return;
+      }
+
+      // --- BƯỚC 3: Dự phòng tìm trong 'activity_registrations' ---
+      const regQ = query(collection(db, 'activity_registrations'), where('studentId', '==', rawVal));
+      const regSnap = await getDocs(regQ);
+
+      if (!regSnap.empty) {
+        const data = regSnap.docs[0].data();
+        setFullName(data.fullName || data.name || '');
+        parseMajorAndCohort(data.major || data.majorAndClass || '');
+        setGroup(formatToName(data.group || data.to_id || 'TNV'));
+        setDob(data.dob || data.ngaySinh || '');
+        setIsMemberExists(true);
+        return;
+      }
+
       setIsMemberExists(false);
-      setGroup('Tổ 6');
-    } catch (err) {
-      console.error('Lỗi tự điền thông tin:', err);
+      setGroup('TNV');
+    } catch (err: any) {
+      setIsMemberExists(false);
+      setGroup('TNV');
+    } finally {
+      setIsFetchingInfo(false);
     }
   };
 
   const handleMssvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setMssv(val);
-    autoFetchMemberInfo(val);
+
+    if (!val.trim()) {
+      setIsMemberExists(false);
+      setFullName('');
+      setSelectedMajor('');
+      setCohortNumber('48');
+      setDob('');
+      setGroup('TNV');
+      return;
+    }
+
+    if (val.trim().length >= 8) {
+      autoFetchMemberInfo(val);
+    }
   };
 
   const handleCheckboxChange = (qId: string, option: string, maxSelect?: number) => {
@@ -284,8 +442,13 @@ export default function FormDangKyChiTietPage() {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!fullName.trim() || !mssv.trim() || !phone.trim() || !major.trim()) {
+    if (!fullName.trim() || !mssv.trim() || !selectedMajor.trim()) {
       setErrorMsg('Vui lòng điền đầy đủ các trường thông tin bắt buộc (*)!');
+      return;
+    }
+
+    if (!cohortNumber || cohortNumber.length !== 2) {
+      setErrorMsg('Vui lòng nhập đúng 2 chữ số của Khóa (Ví dụ: 48 cho K48)!');
       return;
     }
 
@@ -302,7 +465,6 @@ export default function FormDangKyChiTietPage() {
     try {
       setSubmitting(true);
 
-      // Kiểm tra xem đã đăng ký hoạt động này chưa
       const checkDupQ = query(
         collection(db, 'activity_registrations'),
         where('activityId', '==', activity?.id || activityId),
@@ -315,35 +477,37 @@ export default function FormDangKyChiTietPage() {
         return;
       }
 
-      const assignedGroup = group.trim() || 'Tổ 6';
+      const assignedGroup = group.trim() || 'TNV';
+      const cleanSid = cleanId(mssv);
+      const formattedMajor = `${selectedMajor.trim()} K${cohortNumber.trim()}`.trim();
 
-      // Nếu MSSV chưa có trong bảng thành viên, tự động thêm mới vào collection members với Tổ 6
+      // Nếu là người mới chưa có trong hệ thống thì lưu vào collection users
       if (!isMemberExists) {
         try {
-          const newMemberId = `mem_${cleanId(mssv)}`;
-          await setDoc(doc(db, 'members', newMemberId), {
-            studentId: mssv.trim(),
-            fullName: fullName.trim(),
-            major: major.trim(),
-            group: assignedGroup,
-            dob: dob.trim() || 'Chưa cập nhật',
-            phone: phone.trim(),
+          const userPayload = {
+            mssv: mssv.trim(),
+            name: fullName.trim(),
+            majorAndClass: formattedMajor,
+            to_id: assignedGroup === 'TNV' ? 'tnv' : `to_${assignedGroup.replace(/[^0-9]/g, '')}`,
+            ngaySinh: dob.trim() || 'Chưa cập nhật',
+            role: 'Thành viên',
+            soBuoiDiemDanh: 0,
             createdAt: serverTimestamp(),
-          });
+          };
+
+          await setDoc(doc(db, 'users', cleanSid), userPayload, { merge: true });
         } catch (memErr) {
-          console.warn('Lỗi ghi đè thành viên:', memErr);
+          console.warn('Lỗi lưu thông tin thành viên vào users:', memErr);
         }
       }
 
-      // Lưu đơn đăng ký hoạt động
       await addDoc(collection(db, 'activity_registrations'), {
         activityId: activity?.id || activityId,
         activityTitle: activity?.tieuDe || 'Hoạt động TNTN',
         studentId: mssv.trim(),
         fullName: fullName.trim(),
-        major: major.trim(),
+        major: formattedMajor,
         group: assignedGroup,
-        phone: phone.trim(),
         dob: dob.trim(),
         answers: answers || {},
         registeredAt: serverTimestamp(),
@@ -470,7 +634,6 @@ export default function FormDangKyChiTietPage() {
                 </p>
               </div>
 
-              {/* KHỐI QR ĐIỂM DANH */}
               <div className="max-w-sm mx-auto bg-gradient-to-b from-slate-50 to-blue-50/50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
                 <div className="bg-white p-4 rounded-2xl inline-block shadow-md border border-slate-100">
                   <QRCodeSVG
@@ -498,7 +661,6 @@ export default function FormDangKyChiTietPage() {
                 </button>
               </div>
 
-              {/* KHỐI LINK THAM GIA NHÓM ZALO */}
               <div className="pt-2">
                 <a
                   href={activity.zaloLink}
@@ -533,9 +695,11 @@ export default function FormDangKyChiTietPage() {
             <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md rounded-[32px] p-6 sm:p-8 border border-slate-200/80 shadow-xl space-y-6">
               
               <div className="space-y-4">
-                <h3 className="font-black text-slate-900 text-sm uppercase border-b border-slate-100 pb-3">
-                  THÔNG TIN SINH VIÊN
-                </h3>
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="font-black text-slate-900 text-sm uppercase">
+                    THÔNG TIN SINH VIÊN
+                  </h3>
+                </div>
 
                 {errorMsg && (
                   <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold flex items-center gap-2">
@@ -548,19 +712,26 @@ export default function FormDangKyChiTietPage() {
                   <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
                     Mã Số Sinh Viên (MSSV) <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nhập MSSV (VD: 4751180032)..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono font-bold focus:bg-white focus:outline-none focus:border-[#0284c7]"
-                    value={mssv}
-                    onChange={handleMssvChange}
-                    onBlur={(e) => autoFetchMemberInfo(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nhập MSSV (VD: 4651170002)..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono font-bold focus:bg-white focus:outline-none focus:border-[#0284c7]"
+                      value={mssv}
+                      onChange={handleMssvChange}
+                      onBlur={(e) => autoFetchMemberInfo(e.target.value)}
+                    />
+                    {isFetchingInfo && (
+                      <Loader2 size={14} className="absolute right-3 top-3 animate-spin text-[#0284c7]" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Nhập mã số sinh viên để hệ thống tự động kiểm tra và điền thông tin.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Họ và Tên */}
+                  <div className="sm:col-span-3">
                     <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
                       Họ và Tên <span className="text-rose-500">*</span>
                     </label>
@@ -568,10 +739,10 @@ export default function FormDangKyChiTietPage() {
                       type="text"
                       required
                       readOnly={isMemberExists}
-                      placeholder="VD: Nguyễn Văn Phú"
+                      placeholder="VD: Nguyễn Văn A"
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
-                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
+                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none tracking-wide' 
                           : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
                       }`}
                       value={fullName}
@@ -579,42 +750,64 @@ export default function FormDangKyChiTietPage() {
                     />
                   </div>
 
-                  <div>
+                  {/* Ô Ngành Học có tìm kiếm gợi ý */}
+                  <div className="sm:col-span-2">
                     <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
-                      Số Điện Thoại <span className="text-rose-500">*</span>
+                      Ngành Học <span className="text-rose-500">*</span>
                     </label>
                     <input
-                      type="tel"
-                      required
-                      placeholder="VD: 0987654321"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#0284c7] bg-slate-50 focus:bg-white"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="sm:col-span-1">
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
-                      Ngành / Lớp / Khóa <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
+                      list="danh-sach-nganh"
                       required
                       readOnly={isMemberExists}
-                      placeholder="VD: Nông học K47"
+                      placeholder="Gõ để tìm ngành (VD: Kỹ thuật phần mềm)..."
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
                           ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
                           : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
                       }`}
-                      value={major}
-                      onChange={(e) => setMajor(e.target.value)}
+                      value={selectedMajor}
+                      onChange={(e) => setSelectedMajor(e.target.value)}
                     />
+                    <datalist id="danh-sach-nganh">
+                      {DANH_SACH_NGANH.map((n, idx) => (
+                        <option key={idx} value={n} />
+                      ))}
+                    </datalist>
                   </div>
 
-                  {/* Đơn vị (Tổ) - Luôn khóa cố định mặc định là Tổ 6 */}
+                  {/* Ô Khóa: Tiền tố K cố định, khóa không cho sửa nếu là thành viên đã đăng ký */}
+                  <div>
+                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                      Khóa <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-xs font-black text-slate-500 select-none pointer-events-none">
+                        K
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={2}
+                        autoComplete="off"
+                        required
+                        readOnly={isMemberExists}
+                        placeholder="48"
+                        className={`w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold font-mono focus:outline-none tracking-widest ${
+                          isMemberExists 
+                            ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
+                            : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
+                        }`}
+                        value={cohortNumber}
+                        onChange={(e) => {
+                          if (isMemberExists) return;
+                          const val = e.target.value.replace(/\D/g, '');
+                          setCohortNumber(val);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Đơn vị (Tổ / TNV) */}
                   <div className="sm:col-span-1">
                     <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
                       Đơn vị (Tổ)
@@ -622,22 +815,23 @@ export default function FormDangKyChiTietPage() {
                     <input
                       type="text"
                       readOnly
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-none"
-                      value={group}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-none"
+                      value={group || 'TNV'}
                     />
                   </div>
 
-                  <div className="sm:col-span-1">
+                  {/* Ngày Sinh */}
+                  <div className="sm:col-span-2">
                     <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
                       Ngày Sinh (Không bắt buộc)
                     </label>
                     <input
                       type="text"
                       readOnly={isMemberExists}
-                      placeholder="VD: 08/08/2006"
+                      placeholder="VD: 31/10/2006"
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
-                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
+                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none font-mono' 
                           : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
                       }`}
                       value={dob}

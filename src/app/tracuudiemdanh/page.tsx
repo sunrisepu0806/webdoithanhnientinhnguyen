@@ -1,22 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  Download, 
-  AlertCircle, 
-  GraduationCap, 
-  Calendar,
-  Loader2,
-  ChevronDown,
-  ChevronUp,
-  FileSpreadsheet
-} from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { db } from '@/lib/firebase';
 import { 
   collection, 
-  getDocs 
+  getDocs,
+  query,
+  where
 } from 'firebase/firestore';
 
 export interface ActivityHistoryItem {
@@ -24,6 +15,12 @@ export interface ActivityHistoryItem {
   name: string;
   date: string;
   points: number;
+}
+
+export interface CertificateDisplayItem {
+  id: string;
+  campaignName: string;
+  fileUrl: string;
 }
 
 export interface MemberItem {
@@ -37,6 +34,7 @@ export interface MemberItem {
   soBuoiThamGia?: number;
   tongDiem?: number;
   history?: ActivityHistoryItem[];
+  certificates?: CertificateDisplayItem[];
 }
 
 interface Ripple {
@@ -90,7 +88,7 @@ function formatCreatedAt(createdAt: any): string {
 export default function TraCuuThanhVienPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [members, setMembers] = useState<MemberItem[]>([]);
-  
+
   // State Tra cứu
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchedMember, setSearchedMember] = useState<MemberItem | null>(null);
@@ -138,7 +136,7 @@ export default function TraCuuThanhVienPage() {
   const loadData = async (): Promise<MemberItem[]> => {
     try {
       const [memSnap, actSnap, attSnap] = await Promise.all([
-        getDocs(collection(db, "members")),
+        getDocs(collection(db, "members")).then((s) => s.empty ? getDocs(collection(db, "users")) : s),
         getDocs(collection(db, "activities")).catch(() => ({ docs: [] })),
         getDocs(collection(db, "attendance")).catch(() => ({ docs: [] }))
       ]);
@@ -153,10 +151,10 @@ export default function TraCuuThanhVienPage() {
 
       const normalized: MemberItem[] = memSnap.docs.map((doc) => {
         const item = doc.data();
-        const sid = cleanId(item.studentId || item.msv || item.studentCode);
-        
+        const sid = cleanId(item.studentId || item.msv || item.studentCode || item.mssv);
+
         const myAtt = allAtt.filter((a: any) => {
-          const aSid = cleanId(a.studentId || a.msv);
+          const aSid = cleanId(a.studentId || a.msv || a.mssv);
           return (aSid && aSid === sid) || (a.memberId && a.memberId === doc.id);
         });
 
@@ -175,13 +173,13 @@ export default function TraCuuThanhVienPage() {
 
         return {
           id: doc.id,
-          studentId: String(item.studentId || item.msv || '').trim(),
+          studentId: String(item.studentId || item.msv || item.mssv || '').trim(),
           fullName: String(item.fullName || item.hoTen || item.name || '').trim(),
           major: String(item.major || item.Major || item.nganhHoc || item.lop || '').trim(),
           group: String(item.group || item.to || '1').replace(/[^0-9]/g, "") || "1",
           dob: formatBirthDate(item.dob || item.ngaySinh),
           createdAt: formatCreatedAt(item.createdAt),
-          soBuoiThamGia: myAtt.length,
+          soBuoiThamGia: myAtt.length || Number(item.soBuoiDiemDanh || 0),
           tongDiem: totalPoints,
           history: historyList
         };
@@ -260,7 +258,7 @@ export default function TraCuuThanhVienPage() {
     };
   }, [isMounted]);
 
-  // Tra cứu theo MSSV hoặc Họ tên
+  // Tra cứu theo MSSV hoặc Họ tên + Đọc GCN
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanKey = searchKeyword.trim().toLowerCase();
@@ -269,7 +267,7 @@ export default function TraCuuThanhVienPage() {
     setSearchLoading(true);
     setIsSearched(true);
     setShowHistory(false);
-    
+
     const currentList = await loadData();
 
     const found = currentList.find((m) => {
@@ -285,7 +283,27 @@ export default function TraCuuThanhVienPage() {
       return false;
     });
 
-    setSearchedMember(found || null);
+    if (found) {
+      try {
+        const certSnap = await getDocs(
+          query(collection(db, "certificates"), where("studentId", "==", found.studentId.toUpperCase()))
+        );
+        const certList: CertificateDisplayItem[] = [];
+        certSnap.forEach((d) => {
+          const cData = d.data();
+          certList.push({
+            id: d.id,
+            campaignName: cData.campaignName || "Chứng nhận hoạt động tình nguyện",
+            fileUrl: cData.fileUrl || "",
+          });
+        });
+        found.certificates = certList;
+      } catch (err) {
+        console.error("Lỗi đọc certificates:", err);
+      }
+    }
+
+    setSearchedMember(found ? { ...found } : null);
     setSearchLoading(false);
   };
 
@@ -312,7 +330,6 @@ export default function TraCuuThanhVienPage() {
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  // Xuất file Excel thông tin cá nhân và lịch sử hoạt động
   const handleExportMemberHistoryExcel = () => {
     if (!searchedMember) return;
     setIsExportingExcel(true);
@@ -331,20 +348,6 @@ export default function TraCuuThanhVienPage() {
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-          <!--[if gte mso 9]>
-          <xml>
-            <x:ExcelWorkbook>
-              <x:ExcelWorksheets>
-                <x:ExcelWorksheet>
-                  <x:Name>LichSuHoatDong</x:Name>
-                  <x:WorksheetOptions>
-                    <x:DisplayGridlines/>
-                  </x:WorksheetOptions>
-                </x:ExcelWorksheet>
-              </x:ExcelWorksheets>
-            </x:ExcelWorkbook>
-          </xml>
-          <![endif]-->
         </head>
         <body>
           <table style="border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 13px;">
@@ -401,29 +404,22 @@ export default function TraCuuThanhVienPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Lich_Su_Hoat_Dong_${searchedMember.studentId}_${searchedMember.fullName.replace(/[\s/\\?%*:|"<>]/g, '_')}.xls`;
+      link.download = `Lich_Su_Hoat_Dong_${searchedMember.studentId}.xls`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Lỗi xuất file Excel:', err);
       alert('Không thể xuất file Excel. Vui lòng thử lại!');
     } finally {
       setIsExportingExcel(false);
     }
   };
 
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f3f7fd]">
-        <Loader2 className="w-8 h-8 text-[#0284c7] animate-spin" />
-      </div>
-    );
-  }
+  if (!isMounted) return null;
 
   return (
-    <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen" suppressHydrationWarning>
+    <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen bg-slate-50" suppressHydrationWarning>
       <style jsx global>{`
         @keyframes rippleCompact {
           0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.9; }
@@ -432,11 +428,6 @@ export default function TraCuuThanhVienPage() {
         @keyframes auroraMove {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
           50% { transform: translate(30px, -20px) scale(1.15); opacity: 0.75; }
-        }
-        @keyframes textShine {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
         }
         @keyframes waveMoveFront {
           0% { transform: translateX(0); }
@@ -449,14 +440,6 @@ export default function TraCuuThanhVienPage() {
         .animate-aurora-glow { animation: auroraMove 12s ease-in-out infinite alternate; }
         .animate-wave-front { display: flex; width: 200%; animation: waveMoveFront 13s linear infinite; }
         .animate-wave-back { display: flex; width: 200%; animation: waveMoveBack 21s linear infinite; }
-        .gradient-shine-title {
-          background: linear-gradient(135deg, #0284c7 0%, #2563eb 35%, #06b6d4 70%, #0284c7 100%);
-          background-size: 250% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: textShine 6s ease-in-out infinite;
-          filter: drop-shadow(0 2px 8px rgba(2, 132, 199, 0.18));
-        }
         .ripple-circle {
           position: absolute;
           width: 24px;
@@ -468,81 +451,57 @@ export default function TraCuuThanhVienPage() {
           animation: rippleCompact 0.7s cubic-bezier(0.1, 0.5, 0.4, 1) forwards;
           z-index: 25;
         }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
 
-      {/* KHỐI CHÍNH */}
       <div
         ref={containerRef}
         onClick={handleContainerClick}
         onMouseMove={handleMouseMove}
-        className="relative min-h-[calc(100vh-80px)] flex flex-col justify-between bg-gradient-to-b from-[#f3f7fd] via-[#f7fafd] to-white overflow-hidden cursor-default flex-1"
+        className="relative min-h-screen flex flex-col justify-between overflow-hidden cursor-default flex-1"
       >
-        {/* CANVAS HẠT BAY */}
-        <canvas
-          ref={canvasRef}
-          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
-        />
-
-        {/* VÒNG GỢN SÓNG KHI CLICK */}
+        {/* Hạt & Ánh sáng Nền */}
+        <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
         {ripples.map((ripple) => (
-          <span
-            key={ripple.id}
-            className="ripple-circle"
-            style={{ left: `${ripple.x}px`, top: `${ripple.y}px` }}
-          />
+          <span key={ripple.id} className="ripple-circle" style={{ left: `${ripple.x}px`, top: `${ripple.y}px` }} />
         ))}
-
-        {/* LƯỚI NỀN CÔNG NGHỆ */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#0284c7 1.5px, transparent 1.5px)', backgroundSize: '30px 30px' }} />
+        
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: 'radial-gradient(#0284c7 1.5px, transparent 1.5px)',
-            backgroundSize: '30px 30px',
-          }}
+          className="pointer-events-none absolute rounded-full blur-[100px] transition-opacity duration-300"
+          style={{ width: '500px', height: '500px', left: `${mousePos.x - 250}px`, top: `${mousePos.y - 250}px`, background: 'radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 70%)', zIndex: 1 }}
         />
+        
+        <div className="pointer-events-none absolute -top-32 -left-32 h-[600px] w-[600px] rounded-full bg-sky-300/20 blur-[120px] animate-aurora-glow" />
+        <div className="pointer-events-none absolute top-1/2 -right-32 h-[500px] w-[500px] rounded-full bg-blue-300/15 blur-[120px] animate-aurora-glow" style={{ animationDelay: '-4s' }} />
 
-        {/* SPOTLIGHT THEO CHUỘT */}
-        <div
-          className="pointer-events-none absolute rounded-full blur-[110px] transition-opacity duration-300"
-          style={{
-            width: '560px',
-            height: '560px',
-            left: `${mousePos.x - 280}px`,
-            top: `${mousePos.y - 280}px`,
-            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, rgba(99, 102, 241, 0.12) 45%, transparent 70%)',
-            zIndex: 1,
-          }}
-        />
-
-        {/* CỰC QUANG BACKGROUND */}
-        <div className="pointer-events-none absolute -top-28 -left-20 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-sky-300/30 via-blue-400/20 to-teal-200/20 blur-[110px] animate-aurora-glow" />
-        <div className="pointer-events-none absolute top-1/3 -right-24 h-[460px] w-[460px] rounded-full bg-gradient-to-br from-indigo-300/20 via-sky-300/25 to-blue-200/20 blur-[120px] animate-aurora-glow" style={{ animationDelay: '-6s' }} />
-
-        {/* NỘI DUNG CHÍNH */}
-        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-10 pt-4 sm:pt-8 pb-10 flex-1 flex flex-col justify-start">
+        {/* Nội dung chính */}
+        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-12 pb-16 flex-1 flex flex-col justify-start">
           
-          {/* HEADER SECTION */}
-          <div className="mb-6 sm:mb-8 space-y-2 text-center">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase gradient-shine-title leading-tight">
-              TRA CỨU THÔNG TIN THÀNH VIÊN
+          <div className="mb-10 text-center space-y-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-sky-600 drop-shadow-sm uppercase">
+              Tra Cứu Thông Tin
             </h1>
-            <p className="mx-auto max-w-xl text-xs sm:text-sm font-medium text-slate-500 leading-relaxed px-2">
-              Cổng tra cứu thông tin điểm danh, số buổi tham gia và tải mã QR định danh cá nhân dành cho tình nguyện viên.
+            <p className="mx-auto max-w-lg text-sm sm:text-base text-slate-500 font-medium">
+              Nhập mã số sinh viên hoặc họ tên để tra cứu thông tin hoạt động và nhận mã QR định danh cá nhân.
             </p>
           </div>
 
-          {/* KHU VỰC TRA CỨU */}
-          <div className="w-full max-w-4xl mx-auto space-y-6 sm:space-y-8">
-            
-            {/* THANH TÌM KIẾM */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 border border-slate-200/80 shadow-xl shadow-sky-950/5 flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="w-full max-w-4xl mx-auto space-y-8">
+            <form onSubmit={handleSearch} className="max-w-xl mx-auto bg-white rounded-2xl p-2.5 border border-slate-200/80 shadow-lg shadow-sky-900/5 flex items-center gap-2 transition-all focus-within:shadow-sky-900/10 focus-within:border-sky-300">
+              <div className="relative flex-1 flex items-center pl-3">
+                <svg className="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
                 <input
                   type="text"
                   required
-                  placeholder="Nhập chính xác MSSV (hoặc Họ tên)..."
-                  className="w-full pl-10 sm:pl-12 pr-3 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-transparent focus:outline-none text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400"
+                  placeholder="Nhập MSSV hoặc Họ tên..."
+                  className="w-full pl-3 pr-4 py-2.5 bg-transparent focus:outline-none text-sm font-semibold text-slate-800 placeholder:text-slate-400"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                 />
@@ -550,200 +509,202 @@ export default function TraCuuThanhVienPage() {
               <button
                 type="submit"
                 disabled={searchLoading}
-                suppressHydrationWarning
-                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-[#0284c7] hover:bg-[#0369a1] text-white font-extrabold rounded-xl sm:rounded-2xl text-xs sm:text-sm transition-all shadow-md shadow-blue-500/20 active:scale-95 flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center shrink-0 disabled:opacity-70 disabled:active:scale-100 min-w-[110px]"
               >
-                {searchLoading ? <Loader2 size={15} className="animate-spin" /> : <Search size={14} />}
-                <span>{searchLoading ? 'Đang tìm...' : 'Tra Cứu'}</span>
+                {searchLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Tra Cứu'}
               </button>
             </form>
 
-            {/* KẾT QUẢ TÌM KIẾM */}
             {isSearched && (
-              <div className="animate-in fade-in zoom-in-95 duration-200">
+              <div className="animate-in fade-in zoom-in-95 duration-300">
                 {searchedMember ? (
-                  <div className="bg-white/95 backdrop-blur-md rounded-[28px] sm:rounded-[36px] p-5 sm:p-8 border border-sky-100 shadow-2xl shadow-sky-950/10">
-                    
-                    {/* BỐ CỤC TRÊN: THÔNG TIN VÀ MÃ QR */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+                  <div className="bg-white rounded-[2rem] p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                       
-                      {/* CỘT TRÁI: THÔNG TIN CÁ NHÂN */}
-                      <div className="lg:col-span-7 space-y-4 sm:space-y-5">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-slate-100">
-                          <div className="space-y-1">
-                            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight">
+                      {/* Cột Trái: Thông tin cá nhân */}
+                      <div className="lg:col-span-8 space-y-8">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
+                          <div>
+                            <span className="inline-block px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold rounded-lg mb-3"></span>
+                            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight mb-1">
                               {searchedMember.fullName}
                             </h2>
-
-                            <p className="text-xs sm:text-sm text-slate-600 font-semibold flex items-center gap-1.5">
-                              <GraduationCap size={16} className="text-[#0284c7]" />
-                              <span>{searchedMember.major || "Chưa cập nhật"}</span>
-                            </p>
+                            <p className="text-slate-500 font-medium">{searchedMember.major || "Chưa cập nhật ngành học"}</p>
                           </div>
-
-                          {/* KHỐI TÍCH LŨY HOẠT ĐỘNG */}
-                          <div className="bg-gradient-to-br from-blue-50 to-indigo-50/80 p-3.5 sm:p-4 rounded-2xl border border-blue-100 text-center shrink-0 sm:min-w-[140px]">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0284c7] block mb-0.5">
-                              Tích Lũy Hoạt Động
+                          
+                          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center min-w-[130px]">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Tổng Tích Lũy</span>
+                            <div className="flex items-baseline justify-center gap-1">
+                              <span className="text-3xl font-black text-sky-600">{searchedMember.soBuoiThamGia || 0}</span>
+                              <span className="text-sm font-bold text-slate-400">buổi</span>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block">
+                              {searchedMember.tongDiem || 0} điểm
                             </span>
-                            <span className="text-2xl sm:text-3xl font-black text-slate-900 block leading-tight">
-                              {searchedMember.soBuoiThamGia || 0} <span className="text-xs font-bold text-slate-500">Buổi</span>
-                            </span>
-                            
-                            <button
-                              type="button"
-                              onClick={() => setShowHistory((prev) => !prev)}
-                              className="mt-1.5 text-[11px] font-extrabold text-[#0284c7] hover:text-[#0369a1] inline-flex items-center gap-1 transition-colors underline-offset-2 hover:underline cursor-pointer"
-                            >
-                              {showHistory ? 'Thu gọn' : 'Xem chi tiết'}
-                              {showHistory ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                            </button>
                           </div>
                         </div>
 
-                        {/* Grid chi tiết hồ sơ */}
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs">
-                          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mã Số Sinh Viên</span>
-                            <p className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{searchedMember.studentId}</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Mã Số Sinh Viên</span>
+                            <p className="font-mono font-bold text-slate-800 text-sm">{searchedMember.studentId}</p>
                           </div>
-
-                          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ngày Sinh</span>
-                            <p className="font-bold text-slate-800 text-xs sm:text-sm font-mono">{formatBirthDate(searchedMember.dob)}</p>
+                          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày Sinh</span>
+                            <p className="font-mono font-bold text-slate-800 text-sm">{formatBirthDate(searchedMember.dob)}</p>
+                          </div>
+                          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Tổ Hoạt Động</span>
+                            <p className="font-bold text-slate-800 text-sm">Tổ {searchedMember.group || '1'}</p>
+                          </div>
+                          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày Tham Gia</span>
+                            <p className="font-mono font-bold text-slate-800 text-sm">{searchedMember.createdAt || '27/04/2023'}</p>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                          <div className="rounded-2xl bg-sky-50/60 border border-sky-100 p-3 sm:p-3.5 text-xs text-slate-600 flex items-center gap-2 flex-1">
-                            <Calendar size={15} className="text-[#0284c7] shrink-0" />
-                            <span>Ngày tham gia: <strong className="text-slate-800">{searchedMember.createdAt || '27/04/2023'}</strong></span>
-                          </div>
-
-                          {/* NÚT XUẤT FILE EXCEL CHO THÀNH VIÊN */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowHistory(!showHistory)}
+                            className="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                          >
+                            <svg className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            {showHistory ? 'Đóng Lịch Sử Hoạt Động' : 'Xem Lịch Sử Hoạt Động'}
+                          </button>
+                          
                           <button
                             type="button"
                             onClick={handleExportMemberHistoryExcel}
                             disabled={isExportingExcel}
-                            className="py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+                            className="flex-1 py-3 px-4 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 font-bold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                           >
-                            {isExportingExcel ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={15} />}
-                            <span>Xuất File Excel</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            {isExportingExcel ? 'Đang Xuất...' : 'Xuất File Excel'}
                           </button>
                         </div>
                       </div>
 
-                      {/* CỘT PHẢI: MÃ QR ĐIỂM DANH */}
-                      <div className="lg:col-span-5 flex flex-col items-center justify-center">
-                        <div className="w-full bg-gradient-to-b from-slate-50 to-blue-50/50 p-5 sm:p-6 rounded-3xl border border-slate-200/80 text-center space-y-3.5 shadow-sm">
-                          <div className="bg-white p-3.5 sm:p-4 rounded-2xl inline-block shadow-md border border-slate-100 transition-transform duration-300 hover:scale-105">
+                      {/* Cột Phải: QR Code */}
+                      <div className="lg:col-span-4 flex flex-col items-center">
+                        <div className="w-full bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200 text-center flex flex-col items-center gap-4">
+                          <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                             <QRCodeSVG
                               ref={qrSearchRef}
                               value={searchedMember.studentId}
-                              size={150}
+                              size={160}
                               level="H"
                               includeMargin={false}
                             />
                           </div>
-
-                          <div className="space-y-0.5">
-                            <p className="text-xs font-bold text-slate-800">Mã QR Điểm Danh Cá Nhân</p>
-                            <p className="text-[11px] text-slate-400">Xuất trình mã này cho Ban cán sự khi tham gia hoạt động</p>
+                          <div className="space-y-1">
+                            <p className="text-sm font-bold text-slate-800">Mã QR Định Danh</p>
+                            <p className="text-[11px] text-slate-500 max-w-[200px] leading-tight mx-auto">
+                              Xuất trình mã này cho Ban cán sự khi điểm danh hoạt động
+                            </p>
                           </div>
-
-                          <div>
-                            <button
-                              type="button"
-                              suppressHydrationWarning
-                              onClick={() => handleDownloadQR(qrSearchRef.current, searchedMember.studentId)}
-                              className="w-full py-2.5 sm:py-3 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-                            >
-                              <Download size={14} /> Tải Mã QR Về Điện Thoại
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadQR(qrSearchRef.current, searchedMember.studentId)}
+                            className="w-full mt-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Tải Mã QR
+                          </button>
                         </div>
                       </div>
-
                     </div>
 
-                    {/* PHẦN DƯỚI: LỊCH SỬ THAM GIA HOẠT ĐỘNG */}
+                    {/* Lịch Sử Tham Gia */}
                     {showHistory && (
-                      <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-slate-100 animate-in fade-in duration-200">
-                        <div className="mb-3 sm:mb-4 flex items-center justify-between">
-                          <h3 className="font-black text-slate-800 uppercase tracking-wider text-xs sm:text-sm">
-                            Lịch Sử Tham Gia Hoạt Động ({searchedMember.history?.length || 0})
-                          </h3>
-                        </div>
-
+                      <div className="mt-8 pt-8 border-t border-slate-100 animate-in slide-in-from-top-4 duration-300">
+                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-sky-500" />
+                          Lịch Sử Hoạt Động ({searchedMember.history?.length || 0})
+                        </h3>
+                        
                         {searchedMember.history && searchedMember.history.length > 0 ? (
-                          <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-                            {searchedMember.history.map((act, index) => (
-                              <div 
-                                key={act.id || index} 
-                                className="p-3.5 sm:p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between hover:bg-blue-50/40 transition"
-                              >
-                                <div className="space-y-0.5">
-                                  <p className="font-black text-slate-800 text-xs sm:text-sm uppercase tracking-tight">
-                                    {act.name}
-                                  </p>
-                                  <p className="text-[10px] font-semibold text-slate-400">
-                                    Ngày: {act.date}
-                                  </p>
+                          <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                            {searchedMember.history.map((act, idx) => (
+                              <div key={act.id || idx} className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-sky-200 transition-colors">
+                                <div>
+                                  <p className="font-semibold text-slate-800 text-sm mb-1">{act.name}</p>
+                                  <p className="text-xs text-slate-500 font-medium">Thời gian: {act.date}</p>
                                 </div>
-                                <span className="text-xs font-black text-[#0284c7] px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-100">
+                                <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold whitespace-nowrap self-start sm:self-auto">
                                   +{act.points} điểm
                                 </span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="p-6 sm:p-8 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                              Chưa có dữ liệu điểm danh hoạt động
-                            </p>
+                          <div className="p-8 rounded-xl bg-slate-50 border border-slate-100 text-center text-slate-500 text-sm font-medium">
+                            Chưa có dữ liệu tham gia hoạt động.
                           </div>
                         )}
                       </div>
                     )}
 
+                    {/* Giấy Chứng Nhận */}
+                    <div className="mt-8 pt-8 border-t border-slate-100">
+                      <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-amber-400" />
+                        Giấy Chứng Nhận ({searchedMember.certificates?.length || 0})
+                      </h3>
+                      
+                      {searchedMember.certificates && searchedMember.certificates.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {searchedMember.certificates.map((cert) => (
+                            <div key={cert.id} className="p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow bg-white">
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-800 text-sm truncate" title={cert.campaignName}>
+                                  {cert.campaignName}
+                                </p>
+                              </div>
+                              <a
+                                href={cert.fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-4 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs transition-colors shrink-0 text-center"
+                              >
+                                Xem Online
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 text-center text-slate-500 text-sm font-medium">
+                          Chưa có chứng nhận nào trên hệ thống.
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 ) : (
-                  <div className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-8 sm:p-10 text-center text-slate-500 border border-slate-200 shadow-md space-y-2">
-                    <AlertCircle size={36} className="text-rose-500 mx-auto" />
-                    <h3 className="font-bold text-slate-900 text-base">Không Tìm Thấy Thông Tin</h3>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                      Không tìm thấy thành viên có thông tin <strong>"{searchKeyword}"</strong> trên hệ thống. Vui lòng kiểm tra lại chính xác Mã số sinh viên.
+                  <div className="max-w-xl mx-auto bg-white rounded-2xl p-10 text-center border border-slate-100 shadow-lg shadow-slate-200/50">
+                    <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">!</div>
+                    <h3 className="font-bold text-slate-900 text-lg mb-2">Không Tìm Thấy Kết Quả</h3>
+                    <p className="text-sm text-slate-500">
+                      Không tìm thấy thành viên <strong>"{searchKeyword}"</strong>. Vui lòng kiểm tra lại chính xác Mã số sinh viên hoặc họ tên.
                     </p>
                   </div>
                 )}
               </div>
             )}
-
-          </div>
-
-        </div>
-
-        {/* DẢI SÓNG BIỂN CHÂN TRANG */}
-        <div className="pointer-events-none relative z-20 h-10 sm:h-14 md:h-20 w-full shrink-0 overflow-hidden leading-none">
-          <div className="absolute inset-0 animate-wave-back opacity-60">
-            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
-            </svg>
-            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
-            </svg>
-          </div>
-
-          <div className="absolute inset-0 animate-wave-front opacity-85">
-            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
-            </svg>
-            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
-            </svg>
           </div>
         </div>
 
+        {/* Footer Waves */}
+        <div className="pointer-events-none relative z-20 h-16 sm:h-24 w-full shrink-0 overflow-hidden leading-none opacity-80">
+          <div className="absolute inset-0 animate-wave-back opacity-50">
+            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2"><path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#bae6fd" /></svg>
+            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2"><path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#bae6fd" /></svg>
+          </div>
+          <div className="absolute inset-0 animate-wave-front opacity-70">
+            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2"><path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#7dd3fc" /></svg>
+            <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="block h-full w-1/2"><path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#7dd3fc" /></svg>
+          </div>
+        </div>
       </div>
     </div>
   );

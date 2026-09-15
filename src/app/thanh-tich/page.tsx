@@ -8,7 +8,7 @@ export default function ThanhTichPage() {
         {/* Tiêu đề trang Thành tích */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl md:text-5xl font-black text-[#0f2d4a] uppercase tracking-tight">
-            THÀNH TÍCH CỦA CÂU LẠC BỘ
+            THÀNH TÍCH CỦA ĐỘI
           </h1>
           <p className="text-xs md:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
             Ghi nhận những dấu ấn tự hào, bằng khen, giấy khen cùng sự đóng góp bền bỉ của Đội Thanh niên Tình nguyện trong hành trình lan tỏa yêu thương vì cộng đồng.

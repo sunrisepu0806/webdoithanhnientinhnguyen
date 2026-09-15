@@ -26,14 +26,9 @@ export interface ActivityRegisterItem {
   rawTime?: number;
 }
 
-// Chuẩn hóa mọi định dạng về timestamp để so sánh/sắp xếp
 function parseDateToTimestamp(dateStr: string, fallbackTimestamp?: any): number {
-  if (fallbackTimestamp?.toMillis) {
-    return fallbackTimestamp.toMillis();
-  }
-  if (fallbackTimestamp?.seconds) {
-    return fallbackTimestamp.seconds * 1000;
-  }
+  if (fallbackTimestamp?.toMillis) return fallbackTimestamp.toMillis();
+  if (fallbackTimestamp?.seconds) return fallbackTimestamp.seconds * 1000;
   if (dateStr && typeof dateStr === 'string') {
     const trimmed = dateStr.trim();
     const directParsed = new Date(trimmed).getTime();
@@ -52,13 +47,11 @@ function parseDateToTimestamp(dateStr: string, fallbackTimestamp?: any): number 
   return 0;
 }
 
-// Hàm chuẩn hóa chuỗi ngày bất kỳ thành chuẩn Ngày/Tháng/Năm (DD/MM/YYYY)
 function formatToVietnameseDate(dateVal?: string): string {
   if (!dateVal || typeof dateVal !== 'string') return '';
   const trimmed = dateVal.trim();
   if (!trimmed) return '';
 
-  // 1. Nếu là chuỗi ISO hoặc datetime-local (VD: 2026-08-30T14:30 hoặc 2026-08-30)
   const parsed = new Date(trimmed);
   if (!isNaN(parsed.getTime()) && (trimmed.includes('T') || trimmed.includes('-'))) {
     const day = parsed.getDate().toString().padStart(2, '0');
@@ -73,34 +66,16 @@ function formatToVietnameseDate(dateVal?: string): string {
     return `${day}/${month}/${year}`;
   }
 
-  // 2. Nếu là chuỗi phân tách bằng gạch chéo / gạch ngang
   const parts = trimmed.split(/[\/\-\.]/);
   if (parts.length === 3) {
     let p1 = parseInt(parts[0], 10);
     let p2 = parseInt(parts[1], 10);
     let p3 = parseInt(parts[2], 10);
 
-    // Dạng YYYY/MM/DD
     if (p1 > 1000) {
-      const year = p1;
-      const month = p2.toString().padStart(2, '0');
-      const day = p3.toString().padStart(2, '0');
-      return `${day}/${month}/${year}`;
+      return `${p3.toString().padStart(2, '0')}/${p2.toString().padStart(2, '0')}/${p1}`;
     }
-
-    // Dạng MM/DD/YYYY (nếu tháng > 12 thì p1 là ngày)
-    if (p1 <= 12 && p2 > 12) {
-      const day = p2.toString().padStart(2, '0');
-      const month = p1.toString().padStart(2, '0');
-      const year = p3 < 100 ? p3 + 2000 : p3;
-      return `${day}/${month}/${year}`;
-    }
-
-    // Mặc định xem p1 là ngày, p2 là tháng
-    const day = p1.toString().padStart(2, '0');
-    const month = p2.toString().padStart(2, '0');
-    const year = p3 < 100 ? p3 + 2000 : p3;
-    return `${day}/${month}/${year}`;
+    return `${p1.toString().padStart(2, '0')}/${p2.toString().padStart(2, '0')}/${p3 < 100 ? p3 + 2000 : p3}`;
   }
 
   return trimmed;
@@ -110,7 +85,6 @@ export default function DanhSachDangKyPage() {
   const [activities, setActivities] = useState<ActivityRegisterItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Hiệu ứng Spotlight & Canvas hạt rơi
   const [mousePos, setMousePos] = useState({ x: 600, y: 300 });
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -156,13 +130,13 @@ export default function DanhSachDangKyPage() {
     };
     window.addEventListener('resize', handleResize);
 
-    const particles = Array.from({ length: 24 }).map(() => ({
+    const particles = Array.from({ length: 22 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
       radius: Math.random() * 2 + 1,
       speedX: (Math.random() - 0.5) * 0.4,
-      speedY: Math.random() * 0.5 + 0.2,
-      opacity: Math.random() * 0.5 + 0.2,
+      speedY: Math.random() * 0.4 + 0.2,
+      opacity: Math.random() * 0.4 + 0.15,
     }));
 
     const render = () => {
@@ -194,7 +168,6 @@ export default function DanhSachDangKyPage() {
     };
   }, []);
 
-  // Tải dữ liệu biểu mẫu
   useEffect(() => {
     const fetchActivities = async () => {
       try {
@@ -216,7 +189,7 @@ export default function DanhSachDangKyPage() {
             id: d.id,
             tieuDe: data.title || data.tieuDe || 'HOẠT ĐỘNG TÌNH NGUYỆN',
             moTaNgan: data.description || data.moTaNgan || '',
-            anhDaiDien: data.bannerImage || data.anhDaiDien || '/logo.png',
+            anhDaiDien: data.bannerImage || data.anhDaiDien || '/icon.png',
             ngayDang: formatToVietnameseDate(rawDateStr),
             startDate: data.startDate || '',
             endDate: data.endDate || '',
@@ -240,16 +213,11 @@ export default function DanhSachDangKyPage() {
   }, []);
 
   return (
-    <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen bg-gradient-to-b from-[#f3f7fd] via-[#f7fafd] to-white" suppressHydrationWarning>
-      
+    <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen bg-[#f3f8fd]/70" suppressHydrationWarning>
       <style jsx global>{`
         @keyframes rippleCompact {
           0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.9; }
           100% { transform: translate(-50%, -50%) scale(5.5); opacity: 0; }
-        }
-        @keyframes auroraMove {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
-          50% { transform: translate(30px, -20px) scale(1.15); opacity: 0.75; }
         }
         @keyframes waveMoveFront {
           0% { transform: translateX(0); }
@@ -259,15 +227,14 @@ export default function DanhSachDangKyPage() {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .animate-aurora-glow { animation: auroraMove 12s ease-in-out infinite alternate; }
-        .animate-wave-front { display: flex; width: 200%; animation: waveMoveFront 13s linear infinite; }
-        .animate-wave-back { display: flex; width: 200%; animation: waveMoveBack 21s linear infinite; }
+        .animate-wave-front { display: flex; width: 200%; animation: waveMoveFront 14s linear infinite; }
+        .animate-wave-back { display: flex; width: 200%; animation: waveMoveBack 22s linear infinite; }
         .ripple-circle {
           position: absolute;
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          border: 2px solid rgba(2, 132, 199, 0.6);
+          border: 2px solid rgba(2, 132, 199, 0.4);
           background: radial-gradient(circle, rgba(186, 230, 253, 0.35) 0%, transparent 70%);
           pointer-events: none;
           animation: rippleCompact 0.7s cubic-bezier(0.1, 0.5, 0.4, 1) forwards;
@@ -275,7 +242,6 @@ export default function DanhSachDangKyPage() {
         }
       `}</style>
 
-      {/* KHỐI NỘI DUNG CHÍNH */}
       <div 
         ref={containerRef}
         onClick={handleContainerClick}
@@ -292,67 +258,58 @@ export default function DanhSachDangKyPage() {
           />
         ))}
 
-        <div 
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(#0284c7 1.5px, transparent 1.5px)',
-            backgroundSize: '30px 30px'
-          }}
-        />
-
+        {/* Ánh sáng nền nhẹ nhàng */}
         <div 
           className="absolute pointer-events-none rounded-full blur-[110px] transition-opacity duration-300"
           style={{
-            width: '560px',
-            height: '560px',
-            left: `${mousePos.x - 280}px`,
-            top: `${mousePos.y - 280}px`,
-            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, rgba(99, 102, 241, 0.12) 45%, transparent 70%)',
+            width: '480px',
+            height: '480px',
+            left: `${mousePos.x - 240}px`,
+            top: `${mousePos.y - 240}px`,
+            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.15) 0%, transparent 70%)',
             zIndex: 1
           }}
         />
 
-        <div className="absolute -top-28 -left-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-sky-300/30 via-blue-400/20 to-teal-200/20 blur-[110px] animate-aurora-glow pointer-events-none" />
-        <div className="absolute top-1/3 -right-24 w-[460px] h-[460px] rounded-full bg-gradient-to-br from-indigo-300/20 via-sky-300/25 to-blue-200/20 blur-[120px] animate-aurora-glow pointer-events-none" style={{ animationDelay: '-6s' }} />
-
-        {/* NỘI DUNG DANH SÁCH CARD NGANG */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 pt-8 pb-16 space-y-6">
+        {/* NỘI DUNG CHÍNH */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 w-full relative z-20 pt-8 pb-20 space-y-8">
           
+          {/* Nút quay lại */}
           <div>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0284c7] transition"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#0284c7] transition bg-white/70 backdrop-blur-xs px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-xs"
             >
-              <ArrowLeft size={14} /> Về Trang Chủ
+              <ArrowLeft size={13} /> Về Trang Chủ
             </Link>
           </div>
 
-          <div className="text-center space-y-1.5 pb-2">
-            <h1 className="text-3xl sm:text-4xl md:text-[40px] font-black text-[#0284c7] tracking-tight uppercase">
-              ĐĂNG KÝ THAM GIA HOẠT ĐỘNG
+          {/* TIÊU ĐỀ THEO PHONG CÁCH BÀI VIẾT (TƯƠNG ĐỒNG ẢNH MẪU) */}
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl md:text-[34px] font-extrabold text-[#0284c7] tracking-tight leading-tight">
+              Đăng Ký Tham Gia Hoạt Động
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto">
-              Danh sách các hoạt động thiện nguyện và chương trình đang mở đăng ký của Đội TNTN QNU.
+            <p className="text-xs sm:text-[13px] text-slate-500 italic font-normal leading-relaxed">
+              Danh sách các hoạt động thiện nguyện, chiến dịch và chương trình đang mở đăng ký của <strong className="font-semibold not-italic text-slate-700">Đội TNTN QNU</strong>.
             </p>
           </div>
 
-          {/* DANH SÁCH CÁC CARD */}
+          {/* DANH SÁCH CARD THEO PHONG CÁCH BO GÓC LỚN & ĐỔ BÓNG MỀM */}
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[1, 2].map((i) => (
-                <div key={i} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 animate-pulse">
-                  <div className="w-full md:w-80 h-44 bg-slate-200 rounded-2xl shrink-0" />
-                  <div className="flex-1 space-y-3 py-2">
-                    <div className="h-4 bg-slate-200 rounded w-1/4" />
-                    <div className="h-6 bg-slate-200 rounded w-3/4" />
-                    <div className="h-4 bg-slate-100 rounded w-full" />
-                    <div className="h-4 bg-slate-100 rounded w-2/3" />
+                <div key={i} className="bg-white/90 rounded-[28px] p-6 border border-slate-200/80 shadow-[0_8px_25px_rgba(2,132,199,0.06)] flex flex-col md:flex-row items-center gap-6 animate-pulse">
+                  <div className="w-full md:w-72 h-44 bg-slate-200 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-3 w-full">
+                    <div className="h-5 bg-slate-200 rounded w-1/2" />
+                    <div className="h-3.5 bg-slate-100 rounded w-full" />
+                    <div className="h-3.5 bg-slate-100 rounded w-4/5" />
                   </div>
                 </div>
               ))}
             </div>
           ) : activities.length > 0 ? (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {activities.map((item) => {
                 const now = new Date().getTime();
                 const endTimestamp = item.endDate ? new Date(item.endDate).getTime() : NaN;
@@ -365,102 +322,131 @@ export default function DanhSachDangKyPage() {
                 const isClosed = !item.isOpen || isFull || isExpired || isNotStarted;
 
                 const formattedEndDate = formatToVietnameseDate(item.endDate);
+                const isDefaultLogo = item.anhDaiDien.includes('icon.png') || item.anhDaiDien.includes('logo.png');
 
                 return (
                   <div
                     key={item.id}
-                    className="bg-white rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-center gap-6 group"
+                    className="bg-white/90 backdrop-blur-xs rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_8px_30px_rgba(2,132,199,0.06)] hover:shadow-[0_12px_36px_rgba(2,132,199,0.12)] transition-all duration-300 flex flex-col md:flex-row items-center gap-6 group"
                   >
-                    {/* KHỐI ẢNH BÊN TRÁI */}
-                    <div className="w-full md:w-[360px] h-52 sm:h-56 bg-slate-100 rounded-2xl overflow-hidden shrink-0 border border-slate-100">
-                      <img
-                        src={item.anhDaiDien || '/logo.png'}
-                        alt={item.tieuDe}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
+                    {/* KHỐI ẢNH ĐẠI DIỆN BO CONG */}
+                    <div className="w-full md:w-[280px] lg:w-[320px] h-48 sm:h-52 rounded-[22px] overflow-hidden shrink-0 border border-slate-100 bg-slate-50 flex items-center justify-center relative">
+                      {isDefaultLogo ? (
+                        <div className="w-24 h-24 rounded-full bg-white p-2.5 shadow-sm border border-slate-100 flex items-center justify-center">
+                          <img
+                            src={item.anhDaiDien}
+                            alt="Logo"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.anhDaiDien}
+                          alt={item.tieuDe}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
 
-                    {/* KHỐI THÔNG TIN Ở GIỮA */}
-                    <div className="flex-1 min-w-0 space-y-2.5 text-left w-full">
-                      <span className="text-xs font-black uppercase text-[#0284c7] tracking-wider block">
-                        ĐĂNG KÝ CHƯƠNG TRÌNH
-                      </span>
-
-                      <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 leading-snug uppercase tracking-tight group-hover:text-[#0284c7] transition-colors line-clamp-2">
-                        {item.tieuDe}
-                      </h2>
-
-                      <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed font-normal">
-                        {item.moTaNgan || 'Chào mừng bạn tham gia hoạt động cùng Đội Thanh niên Tình nguyện QNU.'}
-                      </p>
-
-                      {/* HÀNG THÔNG TIN: NGÀY/THÁNG/NĂM CHUẨN XÁC */}
-                      <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-semibold text-slate-400 pt-1">
-                        {item.ngayDang && (
-                          <span className="flex items-center gap-1.5">
-                            <Calendar size={14} className="text-[#0284c7]" /> {item.ngayDang}
+                      {/* Trạng thái đè lên ảnh */}
+                      <div className="absolute top-3 left-3">
+                        {isClosed ? (
+                          <span className="px-3 py-1 rounded-full bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-bold uppercase tracking-wider">
+                            {isExpired ? 'Đã hết hạn' : isNotStarted ? 'Sắp diễn ra' : isFull ? 'Đủ số lượng' : 'Tạm đóng'}
                           </span>
-                        )}
-
-                        <span className="flex items-center gap-1.5">
-                          <Users size={14} className="text-[#0284c7]" /> 
-                          {hasLimit ? (
-                            <span>
-                              <strong className={isFull ? 'text-rose-600' : 'text-slate-700'}>{item.soNguoiDangKy}/{item.maxParticipants}</strong> đã đăng ký
-                            </span>
-                          ) : (
-                            <span>{item.soNguoiDangKy} đã đăng ký</span>
-                          )}
-                        </span>
-
-                        {formattedEndDate && (
-                          <span className="flex items-center gap-1.5 text-slate-500">
-                            <Clock size={14} className="text-[#0284c7]" />
-                            <span>Hạn chót: <strong>{formattedEndDate}</strong></span>
+                        ) : (
+                          <span className="px-3 py-1 rounded-full bg-[#0284c7] text-white text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                            Đang mở
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* NÚT HÀNH ĐỘNG BÊN PHẢI */}
+                    {/* KHỐI THÔNG TIN VĂN BẢN (TYPOGRAPHY THEO MẪU) */}
+                    <div className="flex-1 min-w-0 space-y-2.5 text-left w-full">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#0284c7] block">
+                        ĐĂNG KÝ CHƯƠNG TRÌNH
+                      </span>
+
+                      <h2 className="text-lg sm:text-xl font-bold text-[#0284c7] leading-snug tracking-tight group-hover:text-[#0369a1] transition-colors">
+                        {item.tieuDe}
+                      </h2>
+
+                      {/* Đoạn mô tả với font chữ nghiêng và màu xám thanh lịch */}
+                      <p className="text-xs sm:text-[13px] text-slate-600 italic leading-relaxed font-normal">
+                        {item.moTaNgan || (
+                          <>
+                            Chào mừng bạn tham gia hoạt động cùng <strong className="font-semibold not-italic text-slate-800">Đội Thanh niên Tình nguyện QNU</strong>, nơi gắn kết và lưu giữ những kỷ niệm nhiệt huyết của tuổi trẻ.
+                          </>
+                        )}
+                      </p>
+
+                      {/* Hàng thông số ngày tháng và số lượng đăng ký */}
+                      <div className="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs text-slate-500 pt-2 border-t border-slate-100/90 font-medium">
+                        {item.ngayDang && (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar size={13} className="text-[#0284c7]" />
+                            <span>{item.ngayDang}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-1.5">
+                          <Users size={13} className="text-[#0284c7]" />
+                          <span>
+                            {hasLimit ? (
+                              <>
+                                <strong className={isFull ? 'text-rose-600' : 'text-slate-800'}>
+                                  {item.soNguoiDangKy}/{item.maxParticipants}
+                                </strong>{' '}
+                                đã đăng ký
+                              </>
+                            ) : (
+                              `${item.soNguoiDangKy} đã đăng ký`
+                            )}
+                          </span>
+                        </div>
+
+                        {formattedEndDate && (
+                          <div className="flex items-center gap-1.5 text-slate-600">
+                            <Clock size={13} className="text-[#0284c7]" />
+                            <span>Hạn chót: <strong className="text-slate-800">{formattedEndDate}</strong></span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* NÚT THAO TÁC BÊN PHẢI */}
                     <div className="shrink-0 w-full md:w-auto pt-2 md:pt-0">
                       {isClosed ? (
-                        <div className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider text-center border border-slate-200 cursor-not-allowed">
-                          {isExpired
-                            ? 'Đã hết hạn'
-                            : isNotStarted
-                            ? 'Chưa mở'
-                            : isFull
-                            ? 'Đã đủ số lượng'
-                            : 'Đã đóng'}
+                        <div className="w-full md:w-auto px-6 py-3 rounded-full bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider text-center border border-slate-200/80 cursor-not-allowed">
+                          Đã đóng đăng ký
                         </div>
                       ) : (
                         <Link
                           href={`/dang-ky/${item.id}`}
-                          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#0284c7] hover:bg-[#0369a1] text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/25 transition-all active:scale-95 cursor-pointer"
+                          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold rounded-full text-xs uppercase tracking-wider shadow-md shadow-sky-500/20 transition-all active:scale-95 cursor-pointer"
                         >
                           <span>Đăng ký ngay</span>
-                          <ArrowRight size={14} />
+                          <ArrowRight size={13} />
                         </Link>
                       )}
                     </div>
-
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 text-slate-400 font-semibold space-y-2">
-              <p className="text-base font-bold text-slate-600">Hiện tại chưa có hoạt động nào mở đăng ký</p>
-              <p className="text-xs">Vui lòng quay lại sau khi Ban tổ chức phát hành biểu mẫu mới!</p>
+            <div className="text-center py-16 bg-white/80 rounded-[32px] border border-dashed border-slate-200 text-slate-400 font-medium space-y-1.5 max-w-md mx-auto">
+              <p className="text-sm font-bold text-slate-700">Chưa có hoạt động mở đăng ký</p>
+              <p className="text-xs">Hiện tại danh sách biểu mẫu đang được cập nhật, vui lòng quay lại sau!</p>
             </div>
           )}
 
         </div>
 
-        {/* DẢI SÓNG BIỂN CHÂN TRANG */}
-        <div className="w-full overflow-hidden leading-none shrink-0 relative z-20 pointer-events-none h-10 sm:h-14 md:h-20">
-          <div className="absolute inset-0 animate-wave-back opacity-60">
+        {/* DẢI SÓNG BIỂN MỀM CHÂN TRANG */}
+        <div className="w-full overflow-hidden leading-none shrink-0 relative z-20 pointer-events-none h-12 sm:h-16">
+          <div className="absolute inset-0 animate-wave-back opacity-55">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
               <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
             </svg>
@@ -469,7 +455,7 @@ export default function DanhSachDangKyPage() {
             </svg>
           </div>
 
-          <div className="absolute inset-0 animate-wave-front opacity-85">
+          <div className="absolute inset-0 animate-wave-front opacity-80">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
               <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
             </svg>

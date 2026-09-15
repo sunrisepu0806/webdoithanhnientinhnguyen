@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,7 +26,8 @@ export interface LocationItem {
 
 const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentItem = items[currentIndex];
+  const safeIndex = currentIndex % Math.max(items.length, 1);
+  const currentItem = items[safeIndex];
 
   if (!currentItem) return null;
 
@@ -53,7 +54,7 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
               <ChevronLeft size={14} />
             </button>
             <span className="font-mono text-[11px] text-slate-300">
-              {currentIndex + 1}/{items.length}
+              {safeIndex + 1}/{items.length}
             </span>
             <button
               type="button"
@@ -73,6 +74,10 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
         <img
           src={currentItem.hinhAnh || '/anh1.jpg'}
           alt={currentItem.ten}
+          loading="lazy"
+          decoding="async"
+          width={270}
+          height={144}
           className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
         />
       </div>
@@ -100,7 +105,7 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
             className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#0284c7] py-2.5 text-xs font-bold text-white shadow-md shadow-sky-500/20 transition-all hover:bg-sky-600 hover:shadow-sky-500/30 active:scale-95 cursor-pointer"
             style={{ color: '#ffffff', textDecoration: 'none' }}
           >
-            <span>Xem chi tiết {items.length > 1 ? `(${currentIndex + 1}/${items.length})` : ''}</span>
+            <span>Xem chi tiết {items.length > 1 ? `(${safeIndex + 1}/${items.length})` : ''}</span>
             <span className="text-sm font-bold">&rarr;</span>
           </a>
         </div>
@@ -110,107 +115,53 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
 };
 
 export default function NhatKyPage() {
-  const [mounted, setMounted] = useState(false);
-  const [leafletLib, setLeafletLib] = useState<any>(null);
+  const [leafletLib, setLeafletLib] = useState<typeof import('leaflet') | null>(null);
   const [locations, setLocations] = useState<LocationItem[]>([]);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const iconCache = useRef(new Map<number, import('leaflet').DivIcon>());
 
-  // Tải dữ liệu tọa độ trực tiếp từ Firebase Firestore
-  const fetchLocations = useCallback(async () => {
-    try {
-      const snapshot = await getDocs(collection(db, 'locations'));
-      const list: LocationItem[] = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.toaDo && Array.isArray(data.toaDo) && data.toaDo.length >= 2) {
-          list.push({
-            id: docSnap.id,
-            ten: data.ten || '',
-            toaDo: [Number(data.toaDo[0]), Number(data.toaDo[1])],
-            moTa: data.moTa || '',
-            thoiGian: data.thoiGian || '',
-            hinhAnh: data.hinhAnh || '/anh1.jpg',
-            linkUrl: data.linkUrl || '',
-            slug: data.slug || docSnap.id,
-          });
-        }
-      });
-      setLocations(list);
-    } catch (err) {
-      console.error('Lỗi khi tải locations từ Firebase:', err);
-    }
+  useEffect(() => {
+    let active = true;
+    import('leaflet').then((L) => {
+      if (active) setLeafletLib(L);
+    }).catch((error) => console.error('Không thể tải bản đồ:', error));
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
-    import('leaflet').then((L) => {
-      setLeafletLib(L);
-      setMounted(true);
-    });
-    fetchLocations();
-
-    const interval = setInterval(fetchLocations, 10000);
-    return () => clearInterval(interval);
-  }, [fetchLocations]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    containerRef.current.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-    containerRef.current.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
-    const particles = Array.from({ length: 24 }).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 2 + 1,
-      speedX: (Math.random() - 0.5) * 0.4,
-      speedY: Math.random() * 0.5 + 0.2,
-      opacity: Math.random() * 0.5 + 0.2,
-    }));
-
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-      particles.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
-        if (p.y > height) { p.y = 0; p.x = Math.random() * width; }
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(2, 132, 199, ${p.opacity})`;
-        ctx.fill();
+    // Nhận cập nhật khi dữ liệu thay đổi, không tải lại mỗi 10 giây.
+    return onSnapshot(collection(db, 'locations'), (snapshot) => {
+      const list: LocationItem[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (!Array.isArray(data.toaDo) || data.toaDo.length < 2) return;
+        const lat = Number(data.toaDo[0]);
+        const lng = Number(data.toaDo[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) ||
+            Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+        list.push({
+          id: docSnap.id,
+          ten: data.ten || '',
+          toaDo: [lat, lng],
+          moTa: data.moTa || '',
+          thoiGian: data.thoiGian || '',
+          hinhAnh: data.hinhAnh || '/anh1.jpg',
+          linkUrl: data.linkUrl || '',
+          slug: data.slug || docSnap.id,
+        });
       });
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [mounted]);
+      setLocations((previous) => {
+        // Giữ reference cho bản ghi không đổi và bỏ qua snapshot trùng.
+        const byId = new Map(previous.map((item) => [item.id, item]));
+        const next = list.map((item) => {
+          const old = byId.get(item.id);
+          return old && JSON.stringify(old) === JSON.stringify(item) ? old : item;
+        });
+        return previous.length === next.length &&
+          previous.every((item, index) => item === next[index]) ? previous : next;
+      });
+    }, (error) => console.error('Lỗi khi tải locations từ Firebase:', error));
+  }, []);
 
   const groupedLocations = useMemo(() => {
     const groups: { [key: string]: { toaDo: [number, number]; items: LocationItem[] } } = {};
@@ -234,10 +185,12 @@ export default function NhatKyPage() {
   const createMarkerIcon = (count: number = 1) => {
     if (!leafletLib) return undefined;
 
-    return leafletLib.divIcon({
+    const cached = iconCache.current.get(count);
+    if (cached) return cached;
+    const icon = leafletLib.divIcon({
       className: 'custom-logo-marker-clean',
       html: `
-        <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; filter: drop-shadow(0 4px 10px rgba(2, 132, 199, 0.4)); background: transparent; border: none;">
+        <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: transparent; border: none;">
           <div style="width: 42px; height: 42px; border-radius: 50%; background: #ffffff; padding: 2px; box-shadow: 0 0 0 2px #0284c7; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease;">
             <img src="/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; display: block;" />
           </div>
@@ -252,6 +205,8 @@ export default function NhatKyPage() {
       iconAnchor: [22, 22],
       popupAnchor: [0, -30], // Tách rời mũi nhọn popup lên phía trên logo
     });
+    iconCache.current.set(count, icon);
+    return icon;
   };
 
   return (
@@ -273,6 +228,11 @@ export default function NhatKyPage() {
         .animate-wave-front { display: flex; width: 200%; animation: waveMoveFront 13s linear infinite; }
         .animate-wave-back { display: flex; width: 200%; animation: waveMoveBack 21s linear infinite; }
 
+        @media (max-width: 640px), (prefers-reduced-motion: reduce) {
+          .animate-wave-front, .animate-wave-back { animation: none; }
+          .custom-volunteer-popup .animate-pulse { animation: none; }
+        }
+
         /* POPUP STYLE */
         .custom-volunteer-popup .leaflet-popup-content-wrapper {
           padding: 0 !important;
@@ -286,11 +246,9 @@ export default function NhatKyPage() {
       `}</style>
 
       <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
         className="relative min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#f3f7fd] via-[#f7fafd] to-white overflow-hidden cursor-default flex-1"
       >
-        <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
+
 
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.035]"
@@ -300,20 +258,9 @@ export default function NhatKyPage() {
           }}
         />
 
-        <div
-          className="pointer-events-none absolute rounded-full blur-[110px]"
-          style={{
-            width: '560px',
-            height: '560px',
-            left: 'calc(var(--mouse-x, 500px) - 280px)',
-            top: 'calc(var(--mouse-y, 300px) - 280px)',
-            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, rgba(99, 102, 241, 0.12) 45%, transparent 70%)',
-            zIndex: 1,
-          }}
-        />
-
-        <div className="pointer-events-none absolute -top-28 -left-20 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-sky-300/30 via-blue-400/20 to-teal-200/20 blur-[110px] animate-aurora-glow" />
-        <div className="pointer-events-none absolute top-1/3 -right-24 h-[460px] w-[460px] rounded-full bg-gradient-to-br from-indigo-300/20 via-sky-300/25 to-blue-200/20 blur-[120px] animate-aurora-glow" style={{ animationDelay: '-6s' }} />
+        <div className="pointer-events-none absolute inset-0" style={{
+          background: 'radial-gradient(ellipse at 10% 10%, rgba(125,211,252,.22), transparent 50%), radial-gradient(ellipse at 90% 45%, rgba(165,180,252,.18), transparent 50%)',
+        }} />
 
         <div className="relative z-20 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10 pt-8 pb-12 flex-1 flex flex-col justify-center">
           {/* TIÊU ĐỀ SECTION */}
@@ -327,7 +274,7 @@ export default function NhatKyPage() {
           </div>
 
           <div className="relative h-[480px] sm:h-[540px] md:h-[620px] w-full overflow-hidden rounded-[28px] sm:rounded-[36px] border-4 border-white bg-slate-100 shadow-2xl shadow-sky-950/15">
-            {mounted && leafletLib && (
+            {leafletLib && (
               <MapContainer
                 center={[13.7594, 109.12]}
                 zoom={9}
@@ -336,12 +283,15 @@ export default function NhatKyPage() {
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  updateWhenIdle={true}
+                  updateWhenZooming={false}
+                  keepBuffer={2}
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {groupedLocations.map((group, idx) => (
+                {groupedLocations.map((group) => (
                   <Marker
-                    key={idx}
+                    key={`${group.toaDo[0].toFixed(4)}_${group.toaDo[1].toFixed(4)}`}
                     position={group.toaDo}
                     icon={createMarkerIcon(group.items.length)}
                   >
