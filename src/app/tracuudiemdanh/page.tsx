@@ -175,8 +175,8 @@ export default function TraCuuThanhVienPage() {
           id: doc.id,
           studentId: String(item.studentId || item.msv || item.mssv || '').trim(),
           fullName: String(item.fullName || item.hoTen || item.name || '').trim(),
-          major: String(item.major || item.Major || item.nganhHoc || item.lop || '').trim(),
-          group: String(item.group || item.to || '1').replace(/[^0-9]/g, "") || "1",
+          major: String(item.majorAndClass || item.major || item.Major || item.nganhHoc || item.lop || '').trim(),
+          group: String(item.group || item.to || (item.to_id ? String(item.to_id).replace(/[^0-9]/g, "") : '1')).replace(/[^0-9]/g, "") || "1",
           dob: formatBirthDate(item.dob || item.ngaySinh),
           createdAt: formatCreatedAt(item.createdAt),
           soBuoiThamGia: myAtt.length || Number(item.soBuoiDiemDanh || 0),
@@ -525,7 +525,7 @@ export default function TraCuuThanhVienPage() {
                       <div className="lg:col-span-8 space-y-8">
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
                           <div>
-                            <span className="inline-block px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold rounded-lg mb-3"></span>
+                            <span className="inline-block px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold rounded-lg mb-3">Thành viên Đội TNTN</span>
                             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight mb-1">
                               {searchedMember.fullName}
                             </h2>
