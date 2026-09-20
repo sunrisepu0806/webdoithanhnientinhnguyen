@@ -5,9 +5,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { db } from '@/lib/firebase';
 import { 
   collection, 
-  getDocs,
-  query,
-  where
+  getDocs, 
+  getDoc, 
+  doc, 
+  query, 
+  where, 
+  limit 
 } from 'firebase/firestore';
 
 export interface ActivityHistoryItem {
@@ -42,8 +45,6 @@ interface Ripple {
   x: number;
   y: number;
 }
-
-const cleanId = (val: any) => String(val || "").trim().toLowerCase();
 
 function formatBirthDate(dobStr?: any): string {
   if (!dobStr || String(dobStr).trim() === '' || dobStr === 'Chưa cập nhật') {
@@ -87,7 +88,6 @@ function formatCreatedAt(createdAt: any): string {
 
 export default function TraCuuThanhVienPage() {
   const [isMounted, setIsMounted] = useState(false);
-  const [members, setMembers] = useState<MemberItem[]>([]);
 
   // State Tra cứu
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -131,73 +131,6 @@ export default function TraCuuThanhVienPage() {
       y: e.clientY - rect.top,
     });
   };
-
-  // Nạp dữ liệu đồng bộ
-  const loadData = async (): Promise<MemberItem[]> => {
-    try {
-      const [memSnap, actSnap, attSnap] = await Promise.all([
-        getDocs(collection(db, "members")).then((s) => s.empty ? getDocs(collection(db, "users")) : s),
-        getDocs(collection(db, "activities")).catch(() => ({ docs: [] })),
-        getDocs(collection(db, "attendance")).catch(() => ({ docs: [] }))
-      ]);
-
-      const actData = actSnap.docs.map(d => ({ 
-        id: d.id, 
-        ...d.data(),
-        points: Number((d.data() as any).points || 10) 
-      }));
-
-      const allAtt = attSnap.docs.map(d => d.data());
-
-      const normalized: MemberItem[] = memSnap.docs.map((doc) => {
-        const item = doc.data();
-        const sid = cleanId(item.studentId || item.msv || item.studentCode || item.mssv);
-
-        const myAtt = allAtt.filter((a: any) => {
-          const aSid = cleanId(a.studentId || a.msv || a.mssv);
-          return (aSid && aSid === sid) || (a.memberId && a.memberId === doc.id);
-        });
-
-        let totalPoints = 0;
-        const historyList: ActivityHistoryItem[] = myAtt.map((att: any, index: number) => {
-          const act = actData.find(a => a.id === att.activityId);
-          const pts = act?.points || 10;
-          totalPoints += pts;
-          return {
-            id: att.activityId || `hist-${index}`,
-            name: (act as any)?.name || (act as any)?.title || "Hoạt động Đội TNTN",
-            date: (act as any)?.date || att.timestamp?.toDate?.()?.toLocaleDateString('vi-VN') || "Chưa cập nhật ngày",
-            points: pts
-          };
-        });
-
-        return {
-          id: doc.id,
-          studentId: String(item.studentId || item.msv || item.mssv || '').trim(),
-          fullName: String(item.fullName || item.hoTen || item.name || '').trim(),
-          major: String(item.majorAndClass || item.major || item.Major || item.nganhHoc || item.lop || '').trim(),
-          group: String(item.group || item.to || (item.to_id ? String(item.to_id).replace(/[^0-9]/g, "") : '1')).replace(/[^0-9]/g, "") || "1",
-          dob: formatBirthDate(item.dob || item.ngaySinh),
-          createdAt: formatCreatedAt(item.createdAt),
-          soBuoiThamGia: myAtt.length || Number(item.soBuoiDiemDanh || 0),
-          tongDiem: totalPoints,
-          history: historyList
-        };
-      });
-
-      setMembers(normalized);
-      return normalized;
-    } catch (e) {
-      console.error("Lỗi lấy dữ liệu từ Firebase:", e);
-      return [];
-    }
-  };
-
-  useEffect(() => {
-    if (isMounted) {
-      loadData();
-    }
-  }, [isMounted]);
 
   // Canvas hạt bay
   useEffect(() => {
@@ -258,53 +191,99 @@ export default function TraCuuThanhVienPage() {
     };
   }, [isMounted]);
 
-  // Tra cứu theo MSSV hoặc Họ tên + Đọc GCN
+  // Tra cứu chuẩn xác theo collection "users" và Document ID là MSSV
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanKey = searchKeyword.trim().toLowerCase();
-    if (!cleanKey) return;
+    const rawKey = searchKeyword.trim();
+    if (!rawKey) return;
 
     setSearchLoading(true);
     setIsSearched(true);
     setShowHistory(false);
 
-    const currentList = await loadData();
+    try {
+      let targetDoc: any = null;
+      let targetData: any = null;
 
-    const found = currentList.find((m) => {
-      const sId = cleanId(m.studentId);
-      const sName = (m.fullName || "").toLowerCase();
+      // 1. Tìm trực tiếp bằng Document ID trong collection "users" (Chỉ tốn đúng 1 Read!)
+      const userDocRef = doc(db, "users", rawKey);
+      const userSnap = await getDoc(userDocRef);
 
-      if (sId === cleanKey) return true;
-
-      if (cleanKey.length >= 2 && isNaN(Number(cleanKey)) && sName.includes(cleanKey)) {
-        return true;
+      if (userSnap.exists()) {
+        targetDoc = userSnap;
+        targetData = userSnap.data();
+      } else {
+        // Dự phòng nếu Document ID khác MSSV nhưng có trường mssv hoặc studentId
+        const qUser = query(collection(db, "users"), where("mssv", "==", rawKey), limit(1));
+        const resUser = await getDocs(qUser);
+        if (!resUser.empty) {
+          targetDoc = resUser.docs[0];
+          targetData = targetDoc.data();
+        } else {
+          // Dự phòng cho trường hợp lưu với field studentId
+          const qUserSid = query(collection(db, "users"), where("studentId", "==", rawKey), limit(1));
+          const resUserSid = await getDocs(qUserSid);
+          if (!resUserSid.empty) {
+            targetDoc = resUserSid.docs[0];
+            targetData = targetDoc.data();
+          }
+        }
       }
 
-      return false;
-    });
-
-    if (found) {
-      try {
-        const certSnap = await getDocs(
-          query(collection(db, "certificates"), where("studentId", "==", found.studentId.toUpperCase()))
-        );
-        const certList: CertificateDisplayItem[] = [];
-        certSnap.forEach((d) => {
-          const cData = d.data();
-          certList.push({
-            id: d.id,
-            campaignName: cData.campaignName || "Chứng nhận hoạt động tình nguyện",
-            fileUrl: cData.fileUrl || "",
-          });
-        });
-        found.certificates = certList;
-      } catch (err) {
-        console.error("Lỗi đọc certificates:", err);
+      // Không tìm thấy dữ liệu sinh viên
+      if (!targetDoc || !targetData) {
+        setSearchedMember(null);
+        setSearchLoading(false);
+        return;
       }
+
+      const sid = String(targetData.mssv || targetData.studentId || targetDoc.id).trim();
+
+      // 2. Lấy dữ liệu điểm danh & giấy chứng nhận thuộc về sinh viên này
+      const [attSnap, certSnap] = await Promise.all([
+        getDocs(query(collection(db, "attendance"), where("studentId", "==", sid))).catch(() => ({ docs: [] } as any)),
+        getDocs(query(collection(db, "certificates"), where("studentId", "==", sid.toUpperCase()))).catch(() => ({ docs: [] } as any)),
+      ]);
+
+      const historyList: ActivityHistoryItem[] = attSnap.docs.map((d: any, index: number) => {
+        const att = d.data();
+        return {
+          id: att.activityId || `hist-${index}`,
+          name: att.activityName || att.name || "Hoạt động Đội TNTN",
+          date: att.date || att.timestamp?.toDate?.()?.toLocaleDateString('vi-VN') || "Chưa cập nhật ngày",
+          points: Number(att.points || 10),
+        };
+      });
+
+      const certList: CertificateDisplayItem[] = certSnap.docs.map((d: any) => ({
+        id: d.id,
+        campaignName: d.data().campaignName || "Chứng nhận hoạt động tình nguyện",
+        fileUrl: d.data().fileUrl || "",
+      }));
+
+      const totalPoints = historyList.reduce((acc, cur) => acc + cur.points, 0);
+
+      // 3. Khớp chính xác các trường lưu trữ trong Firebase users
+      setSearchedMember({
+        id: targetDoc.id,
+        studentId: sid,
+        fullName: String(targetData.name || targetData.fullName || targetData.hoTen || '').trim(),
+        major: String(targetData.majorAndClass || targetData.major || targetData.nganhHoc || targetData.lop || '').trim(),
+        group: String(targetData.to_id || targetData.group || targetData.to || '1').replace(/[^0-9]/g, "") || "1",
+        dob: formatBirthDate(targetData.ngaySinh || targetData.dob),
+        createdAt: formatCreatedAt(targetData.createdAt),
+        soBuoiThamGia: attSnap.docs.length || Number(targetData.soBuoiDiemDanh || 0),
+        tongDiem: totalPoints,
+        history: historyList,
+        certificates: certList,
+      });
+
+    } catch (err) {
+      console.error("Lỗi tra cứu:", err);
+      setSearchedMember(null);
+    } finally {
+      setSearchLoading(false);
     }
-
-    setSearchedMember(found ? { ...found } : null);
-    setSearchLoading(false);
   };
 
   const handleDownloadQR = (element: SVGSVGElement | null, fileName: string) => {
@@ -487,7 +466,7 @@ export default function TraCuuThanhVienPage() {
               Tra Cứu Thông Tin
             </h1>
             <p className="mx-auto max-w-lg text-sm sm:text-base text-slate-500 font-medium">
-              Nhập mã số sinh viên hoặc họ tên để tra cứu thông tin hoạt động và nhận mã QR định danh cá nhân.
+              Nhập mã số sinh viên để tra cứu thông tin hoạt động và nhận mã QR định danh cá nhân.
             </p>
           </div>
 
@@ -500,7 +479,7 @@ export default function TraCuuThanhVienPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Nhập MSSV hoặc Họ tên..."
+                  placeholder="Nhập MSSV (ví dụ: 4751180032)..."
                   className="w-full pl-3 pr-4 py-2.5 bg-transparent focus:outline-none text-sm font-semibold text-slate-800 placeholder:text-slate-400"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
@@ -685,7 +664,7 @@ export default function TraCuuThanhVienPage() {
                     <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">!</div>
                     <h3 className="font-bold text-slate-900 text-lg mb-2">Không Tìm Thấy Kết Quả</h3>
                     <p className="text-sm text-slate-500">
-                      Không tìm thấy thành viên <strong>"{searchKeyword}"</strong>. Vui lòng kiểm tra lại chính xác Mã số sinh viên hoặc họ tên.
+                      Không tìm thấy thành viên mang mã <strong>"{searchKeyword}"</strong>. Vui lòng kiểm tra lại chính xác Mã số sinh viên.
                     </p>
                   </div>
                 )}

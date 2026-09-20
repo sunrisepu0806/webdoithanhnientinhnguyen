@@ -277,7 +277,7 @@ export default function DanhSachHoatDongPage() {
           {/* Tiêu đề chính */}
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl md:text-[42px] font-black text-[#0284c7] tracking-tight uppercase">
-              HOẠT ĐỘNG CỦA CÂU LẠC BỘ
+              HOẠT ĐỘNG CỦA ĐỘI
             </h1>
           </div>
 
