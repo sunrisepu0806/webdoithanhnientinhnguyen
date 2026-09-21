@@ -12,6 +12,7 @@ import {
   where, 
   limit 
 } from 'firebase/firestore';
+import { getGroupLink, getDeptLink } from '@/data/groupLinks';
 
 export interface ActivityHistoryItem {
   id: string;
@@ -32,6 +33,7 @@ export interface MemberItem {
   fullName: string;
   major: string;
   group?: string;
+  department?: string;
   dob?: string;
   createdAt?: string;
   soBuoiThamGia?: number;
@@ -191,7 +193,7 @@ export default function TraCuuThanhVienPage() {
     };
   }, [isMounted]);
 
-  // Tra cứu chuẩn xác theo collection "users" và Document ID là MSSV
+  // Tra cứu dữ liệu từ Firestore
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const rawKey = searchKeyword.trim();
@@ -205,7 +207,6 @@ export default function TraCuuThanhVienPage() {
       let targetDoc: any = null;
       let targetData: any = null;
 
-      // 1. Tìm trực tiếp bằng Document ID trong collection "users" (Chỉ tốn đúng 1 Read!)
       const userDocRef = doc(db, "users", rawKey);
       const userSnap = await getDoc(userDocRef);
 
@@ -213,14 +214,12 @@ export default function TraCuuThanhVienPage() {
         targetDoc = userSnap;
         targetData = userSnap.data();
       } else {
-        // Dự phòng nếu Document ID khác MSSV nhưng có trường mssv hoặc studentId
         const qUser = query(collection(db, "users"), where("mssv", "==", rawKey), limit(1));
         const resUser = await getDocs(qUser);
         if (!resUser.empty) {
           targetDoc = resUser.docs[0];
           targetData = targetDoc.data();
         } else {
-          // Dự phòng cho trường hợp lưu với field studentId
           const qUserSid = query(collection(db, "users"), where("studentId", "==", rawKey), limit(1));
           const resUserSid = await getDocs(qUserSid);
           if (!resUserSid.empty) {
@@ -230,7 +229,6 @@ export default function TraCuuThanhVienPage() {
         }
       }
 
-      // Không tìm thấy dữ liệu sinh viên
       if (!targetDoc || !targetData) {
         setSearchedMember(null);
         setSearchLoading(false);
@@ -239,7 +237,6 @@ export default function TraCuuThanhVienPage() {
 
       const sid = String(targetData.mssv || targetData.studentId || targetDoc.id).trim();
 
-      // 2. Lấy dữ liệu điểm danh & giấy chứng nhận thuộc về sinh viên này
       const [attSnap, certSnap] = await Promise.all([
         getDocs(query(collection(db, "attendance"), where("studentId", "==", sid))).catch(() => ({ docs: [] } as any)),
         getDocs(query(collection(db, "certificates"), where("studentId", "==", sid.toUpperCase()))).catch(() => ({ docs: [] } as any)),
@@ -263,13 +260,13 @@ export default function TraCuuThanhVienPage() {
 
       const totalPoints = historyList.reduce((acc, cur) => acc + cur.points, 0);
 
-      // 3. Khớp chính xác các trường lưu trữ trong Firebase users
       setSearchedMember({
         id: targetDoc.id,
         studentId: sid,
         fullName: String(targetData.name || targetData.fullName || targetData.hoTen || '').trim(),
         major: String(targetData.majorAndClass || targetData.major || targetData.nganhHoc || targetData.lop || '').trim(),
         group: String(targetData.to_id || targetData.group || targetData.to || '1').replace(/[^0-9]/g, "") || "1",
+        department: String(targetData.department || targetData.mang || targetData.ban || '').trim(),
         dob: formatBirthDate(targetData.ngaySinh || targetData.dob),
         createdAt: formatCreatedAt(targetData.createdAt),
         soBuoiThamGia: attSnap.docs.length || Number(targetData.soBuoiDiemDanh || 0),
@@ -397,6 +394,10 @@ export default function TraCuuThanhVienPage() {
 
   if (!isMounted) return null;
 
+  // Lấy link tương ứng từ file groupLinks.ts
+  const groupUrl = searchedMember ? getGroupLink(searchedMember.group) : '';
+  const deptUrl = searchedMember ? getDeptLink(searchedMember.department) : null;
+
   return (
     <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen bg-slate-50" suppressHydrationWarning>
       <style jsx global>{`
@@ -466,7 +467,7 @@ export default function TraCuuThanhVienPage() {
               Tra Cứu Thông Tin
             </h1>
             <p className="mx-auto max-w-lg text-sm sm:text-base text-slate-500 font-medium">
-              Nhập mã số sinh viên để tra cứu thông tin hoạt động và nhận mã QR định danh cá nhân.
+              Nhập mã số sinh viên để tra cứu thông tin hoạt động, link nhóm tổ và mã QR cá nhân.
             </p>
           </div>
 
@@ -500,7 +501,7 @@ export default function TraCuuThanhVienPage() {
                   <div className="bg-white rounded-[2rem] p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                       
-                      {/* Cột Trái: Thông tin cá nhân */}
+                      {/* Cột Trái: Thông tin cá nhân & Link nhóm */}
                       <div className="lg:col-span-8 space-y-8">
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
                           <div>
@@ -539,6 +540,40 @@ export default function TraCuuThanhVienPage() {
                           <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày Tham Gia</span>
                             <p className="font-mono font-bold text-slate-800 text-sm">{searchedMember.createdAt || '27/04/2023'}</p>
+                          </div>
+                        </div>
+
+                        {/* KHU VỰC THAM GIA NHÓM (Lấy link từ file groupLinks.ts) */}
+                        <div className="p-5 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-3">
+                          <h4 className="text-xs font-extrabold uppercase tracking-wider text-sky-800">
+                            Liên kết nhóm hoạt động của bạn
+                          </h4>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <a
+                              href={groupUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-all shadow-md shadow-sky-600/20 active:scale-95 flex items-center justify-center gap-2"
+                            >
+                              <span>Tham gia Nhóm Tổ {searchedMember.group || '1'}</span>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+
+                            {deptUrl && (
+                              <a
+                                href={deptUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-sky-700 border border-sky-200 font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-2"
+                              >
+                                <span>Nhóm {searchedMember.department}</span>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
+                            )}
                           </div>
                         </div>
 
