@@ -27,7 +27,6 @@ export const DEPARTMENT_LINKS: Record<string, string> = {
   "hau can": "https://zalo.me/g/tjk887qfr7jlepip2r0f",
 };
 
-// Chuẩn hóa tiếng Việt, chữ thường, bỏ dấu và dấu gạch nối
 function cleanKey(str: string): string {
   return (str || '')
     .normalize('NFD')
@@ -40,15 +39,16 @@ function cleanKey(str: string): string {
     .trim();
 }
 
-// Lấy link Tổ
+// Lấy link Tổ (Hỗ trợ undefined an toàn)
 export function getGroupLink(groupId?: string): string {
   if (!groupId) return '';
   const num = String(groupId).replace(/[^0-9]/g, '');
   return GROUP_LINKS[num] || '';
 }
 
-// Tìm link của một mảng đơn lẻ
-export function getSingleDeptLink(deptName: string): string | null {
+// Tìm link của một mảng đơn lẻ (Hỗ trợ deptName?: string để fix lỗi TypeScript)
+export function getSingleDeptLink(deptName?: string): string | null {
+  if (!deptName) return null;
   const key = cleanKey(deptName);
   if (!key) return null;
 
@@ -81,7 +81,7 @@ export function getSingleDeptLink(deptName: string): string | null {
   return null;
 }
 
-// 🟢 THÊM HÀM NÀY ĐỂ TRANG tracuudiemdanh KHÔNG BỊ BÁO LỖI:
+// Xuất thêm hàm getDeptLink để tương thích ngược với trang tracuudiemdanh
 export const getDeptLink = getSingleDeptLink;
 
 // Tách nhiều mảng theo dấu phẩy, chấm phẩy, hoặc dấu /
