@@ -15,8 +15,8 @@ export const DEPARTMENT_LINKS: Record<string, string> = {
   "chup anh": "https://zalo.me/g/91qxjgn9ub5qsgjg50gc",
   "thiet ke": "https://zalo.me/g/f3ubvwpqyque5msothh1",
   "viet bai": "https://zalo.me/g/dul0c6oum6bie1aatnlj",
-  
-  // Link MC - Hoạt náo (Hỗ trợ mọi cách viết: MC, MC - Hoạt náo, Hoạt náo)
+
+  // Link MC - Hoạt náo
   "mc - hoat nao": "https://zalo.me/g/7hrf9n9gvdahwi096iuk",
   "mc hoat nao": "https://zalo.me/g/7hrf9n9gvdahwi096iuk",
   "mc-hoat nao": "https://zalo.me/g/7hrf9n9gvdahwi096iuk",
@@ -27,7 +27,7 @@ export const DEPARTMENT_LINKS: Record<string, string> = {
   "hau can": "https://zalo.me/g/tjk887qfr7jlepip2r0f",
 };
 
-// Chuẩn hóa tiếng Việt, chữ thường, bỏ dấu và bỏ các ký tự đặc biệt
+// Chuẩn hóa tiếng Việt, chữ thường, bỏ dấu và dấu gạch nối
 function cleanKey(str: string): string {
   return (str || '')
     .normalize('NFD')
@@ -35,8 +35,8 @@ function cleanKey(str: string): string {
     .replace(/đ/g, 'd')
     .replace(/Đ/g, 'D')
     .toLowerCase()
-    .replace(/[-_]/g, ' ') // Chuyển dấu gạch ngang thành khoảng trắng
-    .replace(/\s+/g, ' ')  // Thu gọn nhiều khoảng trắng thành 1
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -47,17 +47,15 @@ export function getGroupLink(groupId?: string): string {
   return GROUP_LINKS[num] || '';
 }
 
-// Tìm link của một mảng đơn lẻ (So sánh thông minh)
+// Tìm link của một mảng đơn lẻ
 export function getSingleDeptLink(deptName: string): string | null {
   const key = cleanKey(deptName);
   if (!key) return null;
 
-  // 1. Kiểm tra khớp trực tiếp
   if (DEPARTMENT_LINKS[key]) {
     return DEPARTMENT_LINKS[key];
   }
 
-  // 2. Kiểm tra nếu có chứa từ khóa
   if (key.includes('mc') || key.includes('hoat nao')) {
     return "https://zalo.me/g/7hrf9n9gvdahwi096iuk";
   }
@@ -83,10 +81,13 @@ export function getSingleDeptLink(deptName: string): string | null {
   return null;
 }
 
+// 🟢 THÊM HÀM NÀY ĐỂ TRANG tracuudiemdanh KHÔNG BỊ BÁO LỖI:
+export const getDeptLink = getSingleDeptLink;
+
 // Tách nhiều mảng theo dấu phẩy, chấm phẩy, hoặc dấu /
 export function getDeptLinksList(deptString?: string): { name: string; link: string | null }[] {
   if (!deptString) return [];
-  
+
   const depts = deptString.split(/[,;/]+/).map((d) => d.trim()).filter(Boolean);
 
   return depts.map((d) => ({

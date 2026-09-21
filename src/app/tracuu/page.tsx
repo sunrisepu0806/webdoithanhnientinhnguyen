@@ -125,32 +125,48 @@ export default function TraCuuThanhVienPage() {
     setIsSearched(true);
     setCopiedKey(null);
 
+    // Biến đếm lượt đọc Firestore
+    let readsCount = 0;
+
     try {
       let targetDoc: any = null;
       let targetData: any = null;
 
-      // Tìm theo Document ID (MSSV)
+      // 1. Tìm trực tiếp theo Document ID (MSSV)
       const userDocRef = doc(db, "users", rawKey);
       const userSnap = await getDoc(userDocRef);
+      readsCount += 1;
 
       if (userSnap.exists()) {
         targetDoc = userSnap;
         targetData = userSnap.data();
       } else {
+        // Query dự phòng theo field mssv
         const qUser = query(collection(db, "users"), where("mssv", "==", rawKey), limit(1));
         const resUser = await getDocs(qUser);
+        readsCount += resUser.docs.length;
+
         if (!resUser.empty) {
           targetDoc = resUser.docs[0];
           targetData = targetDoc.data();
         } else {
+          // Query dự phòng theo field studentId
           const qUserSid = query(collection(db, "users"), where("studentId", "==", rawKey), limit(1));
           const resUserSid = await getDocs(qUserSid);
+          readsCount += resUserSid.docs.length;
+
           if (!resUserSid.empty) {
             targetDoc = resUserSid.docs[0];
             targetData = targetDoc.data();
           }
         }
       }
+
+      // In số lượt đọc ra Console (F12) để bạn kiểm tra
+      console.log(
+        `%c[Firestore Tracker] Lần tìm kiếm này tốn: ${readsCount} lượt đọc (read)`,
+        'color: #0284c7; font-weight: bold; font-size: 13px;'
+      );
 
       if (!targetDoc || !targetData) {
         setSearchedMember(null);
@@ -329,7 +345,7 @@ export default function TraCuuThanhVienPage() {
                           <p className="text-slate-500 text-sm font-medium">{searchedMember.major || "Chưa cập nhật ngành học"}</p>
                         </div>
 
-                        {/* Bảng thông tin: Tối giản phẳng và đồng bộ */}
+                        {/* Bảng thông tin */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Mã Số Sinh Viên</span>
