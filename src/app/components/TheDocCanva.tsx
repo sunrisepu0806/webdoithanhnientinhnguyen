@@ -90,7 +90,7 @@ export default function TheDocCanva({ studentId, fullName }: TheDocProps) {
       <button
         onClick={xuatThe}
         disabled={dangTai}
-        className="w-full py-3.5 bg-[#0084FF] hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+        className="w-full py-3.5 bg-[#0084FF] hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
       >
         {dangTai ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
         {dangTai ? 'Đang tạo thẻ...' : 'Tải Thẻ Tình Nguyện Viên'}

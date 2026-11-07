@@ -15,7 +15,7 @@ const joinLinks = [
 
 export default function ChanTrang() {
   return (
-    <footer className="w-full bg-[#0a2540] text-white border-t border-slate-800 relative overflow-hidden select-none">
+    <footer className="w-full bg-[#103940] text-white border-t border-slate-800 relative overflow-hidden select-none">
       {/* Cực quang hắt sáng nền mờ đồng bộ */}
       <div className="absolute -top-24 -left-20 w-80 h-80 bg-sky-500/10 blur-[90px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 -right-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />

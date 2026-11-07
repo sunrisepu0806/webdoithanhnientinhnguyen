@@ -289,7 +289,7 @@ export default function TraCuuThanhVienPage() {
                         <AttendanceSummary member={searchedMember} />
 
                           <a href={`/api/tra-cuu?mssv=${encodeURIComponent(searchedMember.studentId)}&format=xlsx`} download
-                            className="inline-flex rounded-full bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2">
+                            className="inline-flex rounded-sm bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2">
                             Xuất Excel chi tiết hoạt động
                           </a>
 

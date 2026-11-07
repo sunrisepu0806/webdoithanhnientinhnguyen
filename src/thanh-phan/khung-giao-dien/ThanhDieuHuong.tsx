@@ -56,10 +56,10 @@ export default function ThanhDieuHuong() {
       className={`w-full sticky top-0 z-50 select-none transition-all duration-300 ${
         isScrolled
           ? 'bg-white/90 backdrop-blur-md shadow-md shadow-sky-950/5 border-b border-sky-100/80'
-          : 'bg-[#f3f7fd]/80 backdrop-blur-sm border-b border-sky-100/50'
+          : 'bg-[#f8fdfd]/95 backdrop-blur-sm border-b border-sky-100/50'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 h-20 lg:h-16 flex items-center justify-between lg:justify-start lg:gap-5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 h-20 lg:h-16 flex items-center justify-between lg:justify-start lg:gap-7">
         
         {/* LOGO VỚI HIỆU ỨNG TƯƠNG TÁC */}
         <Link href="/" className="flex items-center gap-3 lg:gap-2.5 group z-50 lg:mr-auto">
@@ -81,7 +81,7 @@ export default function ThanhDieuHuong() {
         </Link>
 
         {/* MENU ĐIỀU HƯỚNG DESKTOP */}
-        <nav className="hidden lg:flex items-center gap-0.5 bg-white/60 p-1 rounded-full border border-sky-100/80 shadow-sm backdrop-blur-md">
+        <nav className="hidden lg:flex h-full items-stretch gap-5 xl:gap-6">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -89,15 +89,12 @@ export default function ThanhDieuHuong() {
                 key={link.name}
                 href={link.href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative px-3 py-2 whitespace-nowrap rounded-full text-sm font-bold tracking-tight transition-all duration-200 flex items-center gap-1.5 ${
+                className={`flex items-center whitespace-nowrap border-b-2 pt-0.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-sky-600 ${
                   isActive
-                    ? 'text-brand-ink bg-sky-50 shadow-sm shadow-sky-100'
-                    : 'text-muted-ink hover:text-brand-ink hover:bg-sky-50/50'
+                    ? 'border-sky-600 text-brand-ink'
+                    : 'border-transparent text-muted-ink hover:border-sky-300 hover:text-brand-ink'
                 }`}
               >
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0284c7]" />
-                )}
                 <span>{link.name}</span>
               </Link>
             );
@@ -109,9 +106,8 @@ export default function ThanhDieuHuong() {
           {/* Nút Đăng Ký với hiệu ứng Shimmer */}
           <Link
             href="/dang-ky"
-            className="relative group overflow-hidden px-5 sm:px-6 lg:px-4 py-2.5 lg:py-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200 active:scale-95"
+            className="px-4 py-2.5 lg:py-2 rounded-sm bg-sky-700 hover:bg-sky-800 text-white text-xs sm:text-sm font-semibold transition-colors"
           >
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
             <span className="relative z-10">Đăng Ký</span>
           </Link>
 
@@ -120,7 +116,7 @@ export default function ThanhDieuHuong() {
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Mở menu điều hướng"
-            className="lg:hidden p-2.5 rounded-2xl text-body-ink hover:text-brand-ink hover:bg-white border border-slate-200/80 focus:outline-none transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
+            className="lg:hidden p-2.5 rounded-sm text-body-ink hover:text-brand-ink hover:bg-white border border-slate-200/80 focus:outline-none transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
           >
             <div className="w-5 h-4 flex flex-col justify-between items-center relative">
               <span
@@ -147,7 +143,7 @@ export default function ThanhDieuHuong() {
       {/* THANH TIẾN TRÌNH CUỘN TRANG */}
       <div className="absolute bottom-0 left-0 w-full h-[2.5px] bg-slate-200/30">
         <div
-          className="h-full bg-gradient-to-r from-[#0284c7] via-[#38bdf8] to-[#60a5fa] transition-all duration-150 ease-out"
+          className="h-full bg-gradient-to-r from-sky-700 via-sky-500 to-sky-300 transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
@@ -176,7 +172,7 @@ export default function ThanhDieuHuong() {
                     transform: menuOpen ? 'translateX(0)' : 'translateX(-12px)',
                     opacity: menuOpen ? 1 : 0,
                   }}
-                  className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-base font-bold transition-all duration-300 ${
+                  className={`flex items-center justify-between px-4 py-3.5 rounded-sm text-base font-bold transition-all duration-300 ${
                     isActive
                       ? 'bg-sky-50 text-brand-ink border border-sky-100 shadow-sm'
                       : 'text-body-ink hover:bg-slate-50 hover:text-brand-ink'
@@ -184,7 +180,7 @@ export default function ThanhDieuHuong() {
                 >
                   <span className="flex items-center gap-2">
                     {isActive && (
-                      <span className="w-2 h-2 rounded-full bg-[#0284c7]" />
+                      <span className="w-2 h-2 rounded-sm bg-sky-700" />
                     )}
                     {link.name}
                   </span>

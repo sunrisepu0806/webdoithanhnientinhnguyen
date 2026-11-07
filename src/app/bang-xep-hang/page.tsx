@@ -30,7 +30,7 @@ export default async function MonthlyRanking({ searchParams }: {
           <label className="grid gap-1 text-sm font-semibold text-body-ink">Chọn tháng
             <input type="month" name="thang" min={firstMonth} key={month} defaultValue={month} required className="rounded-xl border border-sky-200 bg-white px-3 py-2 text-base" />
           </label>
-          <button className="rounded-full bg-sky-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-800">Xem xếp hạng</button>
+          <button className="rounded-sm bg-sky-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-800">Xem xếp hạng</button>
         </form>
         <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm">
           <h2 className="bg-sky-800 px-5 py-4 text-lg font-bold text-white">Tháng {number}/{year}</h2>

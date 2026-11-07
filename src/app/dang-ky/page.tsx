@@ -351,7 +351,7 @@ export default function DanhSachDangKyPage() {
                             {isExpired ? 'Đã hết hạn' : isNotStarted ? 'Sắp diễn ra' : isFull ? 'Đủ số lượng' : 'Tạm đóng'}
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full bg-[#0284c7] text-white text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1.5">
+                          <span className="px-3 py-1 rounded-sm bg-sky-700 text-white text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                             Đang mở
                           </span>
@@ -421,7 +421,7 @@ export default function DanhSachDangKyPage() {
                       ) : (
                         <Link
                           href={`/dang-ky/${item.id}`}
-                          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold rounded-full text-xs uppercase tracking-wider shadow-md shadow-sky-500/20 transition-all active:scale-95 cursor-pointer"
+                          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-full text-xs uppercase tracking-wider shadow-md shadow-sky-500/20 transition-all active:scale-95 cursor-pointer"
                         >
                           <span>Đăng ký ngay</span>
                           <ArrowRight size={13} />
@@ -445,19 +445,19 @@ export default function DanhSachDangKyPage() {
         <div className="w-full overflow-hidden leading-none shrink-0 relative z-20 pointer-events-none h-12 sm:h-16">
           <div className="absolute inset-0 animate-wave-back opacity-55">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
           </div>
 
           <div className="absolute inset-0 animate-wave-front opacity-80">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
           </div>
         </div>

@@ -306,7 +306,7 @@ export default function TrangChu() {
             <div className="min-h-[48px] sm:min-h-[56px] flex items-center justify-center lg:justify-start">
               <p className="text-sm sm:text-base md:text-lg font-semibold text-muted-ink leading-relaxed px-2 sm:px-0">
                 {chuoiHienThi}
-                <span className="inline-block w-[2px] sm:w-[2.5px] h-4 sm:h-5 bg-[#0284c7] ml-1.5 translate-y-[2px] animate-pulse"></span>
+                <span className="inline-block w-[2px] sm:w-[2.5px] h-4 sm:h-5 bg-sky-700 ml-1.5 translate-y-[2px] animate-pulse"></span>
               </p>
             </div>
 
@@ -314,7 +314,7 @@ export default function TrangChu() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
               <Link
                 href="/tracuu"
-                className="relative group overflow-hidden px-6 sm:px-8 py-3 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200 active:scale-95"
+                className="relative group overflow-hidden px-6 sm:px-8 py-3 rounded-sm bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-105 transition-all duration-200 active:scale-95"
               >
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
                 <span className="relative z-10">Tra cứu sinh viên</span>
@@ -428,19 +428,19 @@ export default function TrangChu() {
         <div className="w-full overflow-hidden leading-none shrink-0 relative z-20 pointer-events-none h-10 sm:h-14 md:h-20">
           <div className="absolute inset-0 animate-wave-back opacity-60">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
           </div>
 
           <div className="absolute inset-0 animate-wave-front opacity-85">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
           </div>
         </div>

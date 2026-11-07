@@ -539,7 +539,7 @@ export default function FormDangKyChiTietPage() {
     return (
       <div className="min-h-screen bg-[#f8fbfe] flex flex-col items-center justify-center font-sans space-y-4 p-6">
         <h2 className="text-xl font-black text-ink">Không tìm thấy hoạt động!</h2>
-        <Link href="/dang-ky" className="px-5 py-2.5 bg-[#0284c7] text-white font-bold rounded-xl text-xs uppercase">
+        <Link href="/dang-ky" className="px-5 py-2.5 bg-sky-700 text-white font-bold rounded-xl text-xs uppercase">
           Quay lại danh sách
         </Link>
       </div>
@@ -653,7 +653,7 @@ export default function FormDangKyChiTietPage() {
                 <button
                   type="button"
                   onClick={handleDownloadQR}
-                  className="w-full py-2.5 px-4 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-sky-700 hover:bg-sky-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
                   <Download size={14} /> Tải Mã QR Về Máy
                 </button>
@@ -664,7 +664,7 @@ export default function FormDangKyChiTietPage() {
                   href={activity.zaloLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full max-w-sm mx-auto py-3.5 px-6 bg-[#0068ff] hover:bg-[#0055d4] text-white font-extrabold rounded-2xl text-xs sm:text-sm uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-98 cursor-pointer"
+                  className="w-full max-w-sm mx-auto py-3.5 px-6 bg-[#0068ff] hover:bg-[#0055d4] text-white font-extrabold rounded-2xl text-xs sm:text-sm uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25 active:scale-98 cursor-pointer"
                   style={{ textDecoration: 'none' }}
                 >
                   <MessageCircle size={18} />
@@ -929,7 +929,7 @@ export default function FormDangKyChiTietPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 bg-[#0284c7] hover:bg-[#0369a1] text-white font-extrabold rounded-2xl shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 active:scale-98 cursor-pointer mt-4"
+                className="w-full py-4 bg-sky-700 hover:bg-sky-800 text-white font-extrabold rounded-2xl shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 active:scale-98 cursor-pointer mt-4"
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={15} />}
                 <span>{submitting ? 'Đang gửi thông tin...' : 'GỬI ĐĂNG KÝ THAM GIA'}</span>
@@ -943,19 +943,19 @@ export default function FormDangKyChiTietPage() {
         <div className="w-full overflow-hidden leading-none shrink-0 relative z-20 pointer-events-none h-10 sm:h-14 md:h-20">
           <div className="absolute inset-0 animate-wave-back opacity-60">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#dbeafe" />
+              <path d="M0,30 C320,65 420,10 720,25 C1020,40 1140,55 1440,30 L1440,90 L0,90 Z" fill="#d4f2f4" />
             </svg>
           </div>
 
           <div className="absolute inset-0 animate-wave-front opacity-85">
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
             <svg viewBox="0 0 1440 90" fill="none" preserveAspectRatio="none" className="w-1/2 h-full block">
-              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#bfdbfe" />
+              <path d="M0,50 C360,75 500,35 800,45 C1100,55 1250,70 1440,50 L1440,90 L0,90 Z" fill="#a6e4e8" />
             </svg>
           </div>
         </div>
