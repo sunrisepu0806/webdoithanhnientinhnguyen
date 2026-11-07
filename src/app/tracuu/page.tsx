@@ -293,13 +293,24 @@ export default function TraCuuThanhVienPage() {
                             Xuất Excel chi tiết hoạt động
                           </a>
 
-                        <details className="rounded-xl border border-sky-100 p-4">
-                          <summary className="cursor-pointer font-semibold text-brand-ink">Lịch sử tham gia ({searchedMember.records?.length ?? 0} lượt)</summary>
-                          {searchedMember.records?.length ? <ul className="mt-3 divide-y divide-slate-100">{searchedMember.records.slice().reverse().map((row,index) =>
-                            <li key={index} className="py-2 text-sm">
-                              <strong>{row.name}</strong>
-                              <p className="text-muted-ink">{[row.date.split('-').reverse().join('/'), row.shift, row.type].filter(Boolean).join(' · ')} · {row.units} buổi · {row.points} điểm</p>
-                            </li>)}</ul> : <p className="mt-2 text-sm text-muted-ink">Chưa có lượt điểm danh được ghi nhận.</p>}
+                        <details key={searchedMember.studentId} open className="rounded-xl border border-sky-100 bg-white">
+                          <summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-bold text-brand-ink focus-visible:outline-sky-600">
+                            Lịch sử tham gia <span className="ml-1 font-normal text-muted-ink">({searchedMember.records?.length ?? 0} lượt)</span>
+                          </summary>
+                          {searchedMember.records?.length ? (
+                            <ul className="divide-y divide-sky-100 border-t border-sky-100">
+                              {searchedMember.records.slice().reverse().map((row, index) => (
+                                <li key={index} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 px-4 py-3.5">
+                                  <strong className="break-words text-sm leading-snug text-ink">{row.name}</strong>
+                                  <span className="whitespace-nowrap text-sm font-bold tabular-nums text-brand-ink">{row.points} điểm</span>
+                                  <div className="col-span-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-5 text-muted-ink">
+                                    <span className={`rounded-full px-2 font-semibold ${row.type === 'Công việc mảng' ? 'bg-violet-50 text-violet-800' : 'bg-sky-50 text-brand-strong'}`}>{row.type}</span>
+                                    <span>{row.date ? <time dateTime={row.date}>{row.date.split('-').reverse().join('/')}</time> : 'Chưa ghi ngày'}{row.shift && ` · ${row.shift}`} · {row.units} buổi</span>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : <p className="border-t border-sky-100 px-4 py-3 text-sm text-muted-ink">Chưa có lượt điểm danh được ghi nhận.</p>}
                         </details>
 
                         {/* Bảng thông tin */}
