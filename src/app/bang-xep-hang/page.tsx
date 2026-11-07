@@ -1,3 +1,7 @@
+import { redirect } from 'next/navigation';
+
+const firstMonth = '2026-11';
+
 export const metadata = { title: 'Bảng xếp hạng tháng | Đội TNTN QNU' };
 
 export default async function MonthlyRanking({ searchParams }: {
@@ -6,6 +10,7 @@ export default async function MonthlyRanking({ searchParams }: {
   const { thang } = await searchParams;
   const current = new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Ho_Chi_Minh'}).slice(0,7);
   const month = typeof thang === 'string' && /^20\d{2}-(0[1-9]|1[0-2])$/.test(thang) ? thang : current;
+  if (month < firstMonth) redirect('/bang-xep-hang?thang=' + firstMonth);
   const [year, number] = month.split('-');
   type Row = { member:{fullName:string;group:string}; group:number; department:number; points:number };
   let results: Row[] = [];
@@ -20,10 +25,10 @@ export default async function MonthlyRanking({ searchParams }: {
     <section className="min-h-[65vh] bg-sky-50/50 px-4 py-10 sm:py-16">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-3xl font-extrabold tracking-tight text-brand-ink sm:text-5xl">Bảng xếp hạng tháng</h1>
-        <p className="mt-3 text-sm text-muted-ink">Thành viên được xếp theo tổng điểm trong tháng. Cùng điểm sẽ đồng hạng.</p>
+        <p className="mt-3 text-sm text-muted-ink">Từ tháng 11/2026, thành viên được xếp theo tổng điểm từng tháng. Cùng điểm sẽ đồng hạng.</p>
         <form action="/bang-xep-hang" className="my-7 flex flex-wrap items-end gap-3">
           <label className="grid gap-1 text-sm font-semibold text-body-ink">Chọn tháng
-            <input type="month" name="thang" key={month} defaultValue={month} required className="rounded-xl border border-sky-200 bg-white px-3 py-2 text-base" />
+            <input type="month" name="thang" min={firstMonth} key={month} defaultValue={month} required className="rounded-xl border border-sky-200 bg-white px-3 py-2 text-base" />
           </label>
           <button className="rounded-full bg-sky-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-800">Xem xếp hạng</button>
         </form>
