@@ -10,7 +10,7 @@ interface Ripple {
 
 export default function TrangChu() {
   const cacCauSlogan = [
-    'Nhìn bằng mắt, nghe bằng tai, cảm nhận bằng trái tim và hành động',
+    'Tra cứu số buổi tham gia, điểm hoạt động và kết quả tuyển thành viên.',
     'Kết nối sức trẻ, lan tỏa yêu thương',
     'Nhiệt huyết – Tiên phong – Phụng sự cộng đồng',
   ];

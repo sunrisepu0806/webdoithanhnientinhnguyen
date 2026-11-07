@@ -240,8 +240,8 @@ export default function GioiThieuPage() {
           {/* CỘT TRÁI: TIÊU ĐỀ & VĂN BẢN GIỚI THIỆU */}
           <div className="lg:col-span-6 space-y-5 text-left">
             <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] font-black text-brand-ink tracking-tight leading-tight">
-              Về Đội Tình Nguyện <br />
-              <span>Thanh Niên QNU</span>
+              Về Đội Thanh niên <br />
+              <span>Tình nguyện QNU</span>
             </h1>
 
             <div className="space-y-4 text-justify text-sm sm:text-base leading-relaxed text-body-ink">

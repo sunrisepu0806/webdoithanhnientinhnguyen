@@ -2,16 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { db } from '@/lib/firebase';
-import { 
-  collection, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  query, 
-  where, 
-  limit 
-} from 'firebase/firestore';
 import { getDeptLinksList } from '@/data/groupLinks';
 
 export interface MemberItem {
@@ -25,7 +15,7 @@ export interface MemberItem {
   totalPoints?: number;
   group?: string;
   department?: string;
-  dob?: string;
+  records?: {date:string;shift:string;name:string;type:string;units:number;points:number}[];
   createdAt?: string;
 }
 
@@ -68,29 +58,8 @@ interface Ripple {
   y: number;
 }
 
-function formatBirthDate(dobStr?: any): string {
-  if (!dobStr || String(dobStr).trim() === '' || dobStr === 'Chưa cập nhật') {
-    return 'Chưa cập nhật';
-  }
-
-  const clean = String(dobStr).trim();
-
-  if (/^\d{4,6}$/.test(clean)) {
-    const excelDays = parseInt(clean, 10);
-    const dateObj = new Date((excelDays - 25569) * 86400 * 1000);
-    if (!isNaN(dateObj.getTime())) {
-      const d = String(dateObj.getUTCDate()).padStart(2, '0');
-      const m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-      const y = dateObj.getUTCFullYear();
-      return `${d}/${m}/${y}`;
-    }
-  }
-
-  return clean;
-}
-
 function formatCreatedAt(createdAt: any): string {
-  if (!createdAt) return '27/04/2023';
+  if (!createdAt) return 'Chưa cập nhật';
 
   if (typeof createdAt === 'object' && createdAt.seconds) {
     const date = new Date(createdAt.seconds * 1000);
@@ -105,11 +74,10 @@ function formatCreatedAt(createdAt: any): string {
     return createdAt;
   }
 
-  return '27/04/2023';
+  return 'Chưa cập nhật';
 }
 
 export default function TraCuuThanhVienPage() {
-  const [demo, setDemo] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   // State Tra cứu
@@ -128,7 +96,6 @@ export default function TraCuuThanhVienPage() {
   const [ripples, setRipples] = useState<Ripple[]>([]);
 
   useEffect(() => {
-    setDemo(new URLSearchParams(window.location.search).get('mau') === '1');
     setIsMounted(true);
   }, []);
 
@@ -166,86 +133,11 @@ export default function TraCuuThanhVienPage() {
     setSearchLoading(true);
     setIsSearched(true);
 
-    // Biến đếm lượt đọc Firestore
-    let readsCount = 0;
-
     try {
-      if (demo) {
-        const response = await fetch('/api/tra-cuu-mau?mssv=' + encodeURIComponent(rawKey));
-        if (!response.ok) throw new Error('Demo lookup failed');
-        const { member } = await response.json();
-        setSearchedMember(member);
-        return;
-      }
-
-      let targetDoc: any = null;
-      let targetData: any = null;
-
-      // 1. Tìm trực tiếp theo Document ID (MSSV)
-      const userDocRef = doc(db, "users", rawKey);
-      const userSnap = await getDoc(userDocRef);
-      readsCount += 1;
-
-      if (userSnap.exists()) {
-        targetDoc = userSnap;
-        targetData = userSnap.data();
-      } else {
-        // Query dự phòng theo field mssv
-        const qUser = query(collection(db, "users"), where("mssv", "==", rawKey), limit(1));
-        const resUser = await getDocs(qUser);
-        readsCount += resUser.docs.length;
-
-        if (!resUser.empty) {
-          targetDoc = resUser.docs[0];
-          targetData = targetDoc.data();
-        } else {
-          // Query dự phòng theo field studentId
-          const qUserSid = query(collection(db, "users"), where("studentId", "==", rawKey), limit(1));
-          const resUserSid = await getDocs(qUserSid);
-          readsCount += resUserSid.docs.length;
-
-          if (!resUserSid.empty) {
-            targetDoc = resUserSid.docs[0];
-            targetData = targetDoc.data();
-          }
-        }
-      }
-
-      // In số lượt đọc ra Console (F12) để bạn kiểm tra
-      console.log(
-        `%c[Firestore Tracker] Lần tìm kiếm này tốn: ${readsCount} lượt đọc (read)`,
-        'color: #0284c7; font-weight: bold; font-size: 13px;'
-      );
-
-      if (!targetDoc || !targetData) {
-        setSearchedMember(null);
-        setSearchLoading(false);
-        return;
-      }
-
-      const sid = String(targetData.mssv || targetData.studentId || targetDoc.id).trim();
-
-      const rawDept = targetData.mangChuyenMon || 
-                      targetData.mang || 
-                      targetData.department || 
-                      targetData.ban || 
-                      '';
-
-      setSearchedMember({
-        id: targetDoc.id,
-        groupSessions: targetData.groupSessions,
-        departmentSessions: targetData.departmentSessions,
-        totalSessions: targetData.soBuoiDiemDanh ?? targetData.totalSessions,
-        totalPoints: targetData.totalPoints,
-        studentId: sid,
-        fullName: String(targetData.name || targetData.fullName || targetData.hoTen || '').trim(),
-        major: String(targetData.majorAndClass || targetData.major || targetData.nganhHoc || targetData.lop || '').trim(),
-        group: String(targetData.to_id || targetData.group || targetData.to || '').replace(/[^0-9]/g, "") || "1",
-        department: String(rawDept).trim(),
-        dob: formatBirthDate(targetData.ngaySinh || targetData.dob),
-        createdAt: formatCreatedAt(targetData.createdAt),
-      });
-
+      const response = await fetch('/api/tra-cuu?mssv=' + encodeURIComponent(rawKey));
+      if (!response.ok) throw new Error('Lookup failed');
+      const { member, records } = await response.json();
+      setSearchedMember(member ? { ...member, records, createdAt: formatCreatedAt(member.createdAt) } : null);
     } catch (err) {
       setLookupFailed(true);
       console.error("Lỗi tra cứu:", err);
@@ -340,12 +232,12 @@ export default function TraCuuThanhVienPage() {
         <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-10 flex-1 flex flex-col justify-start">
           
           <div className="mb-7 sm:mb-9 text-center space-y-3">
-            <p className="text-xs font-semibold tracking-widest text-brand-ink">{demo ? 'BẢN TRA CỨU MẪU' : 'DÀNH CHO THÀNH VIÊN'}</p>
+            <p className="text-xs font-semibold tracking-widest text-brand-ink">DÀNH CHO THÀNH VIÊN</p>
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-brand-ink">
               Tra cứu thành viên
             </h1>
             <p className="mx-auto max-w-lg text-sm sm:text-base text-muted-ink font-medium">
-              {demo ? 'Nhập mã 9900000001 hoặc 9900000002 để xem hồ sơ thành viên giả lập.' : 'Nhập mã số sinh viên để xem số buổi tham gia, tổng điểm và mã QR điểm danh.'}
+              Nhập mã số sinh viên để xem số buổi, điểm và tải báo cáo hoạt động.
             </p>
           </div>
 
@@ -395,12 +287,20 @@ export default function TraCuuThanhVienPage() {
                         </div>
 
                         <AttendanceSummary member={searchedMember} />
-                        {demo && (
-                          <a href={`/api/tra-cuu-mau?mssv=${encodeURIComponent(searchedMember.studentId)}&format=xlsx`} download
+
+                          <a href={`/api/tra-cuu?mssv=${encodeURIComponent(searchedMember.studentId)}&format=xlsx`} download
                             className="inline-flex rounded-full bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2">
                             Xuất Excel chi tiết hoạt động
                           </a>
-                        )}
+
+                        <details className="rounded-xl border border-sky-100 p-4">
+                          <summary className="cursor-pointer font-semibold text-brand-ink">Lịch sử tham gia ({searchedMember.records?.length ?? 0} lượt)</summary>
+                          {searchedMember.records?.length ? <ul className="mt-3 divide-y divide-slate-100">{searchedMember.records.slice().reverse().map((row,index) =>
+                            <li key={index} className="py-2 text-sm">
+                              <strong>{row.name}</strong>
+                              <p className="text-muted-ink">{[row.date.split('-').reverse().join('/'), row.shift, row.type].filter(Boolean).join(' · ')} · {row.units} buổi · {row.points} điểm</p>
+                            </li>)}</ul> : <p className="mt-2 text-sm text-muted-ink">Chưa có lượt điểm danh được ghi nhận.</p>}
+                        </details>
 
                         {/* Bảng thông tin */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -410,18 +310,13 @@ export default function TraCuuThanhVienPage() {
                           </div>
                           
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">Ngày Sinh</span>
-                            <p className="font-mono font-bold text-ink text-sm">{formatBirthDate(searchedMember.dob)}</p>
-                          </div>
-
-                          <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
                             <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">Ngày Tham Gia</span>
-                            <p className="font-mono font-bold text-ink text-sm">{searchedMember.createdAt || '27/04/2023'}</p>
+                            <p className="font-mono font-bold text-ink text-sm">{searchedMember.createdAt || 'Chưa cập nhật'}</p>
                           </div>
 
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
                             <span className="text-[11px] font-bold text-brand-ink uppercase tracking-wider block mb-1">Tổ Hoạt Động</span>
-                            <p className="font-bold text-ink text-sm">Tổ {searchedMember.group || '1'}</p>
+                            <p className="font-bold text-ink text-sm">{searchedMember.group ? 'Tổ ' + searchedMember.group : 'Chưa cập nhật'}</p>
                           </div>
 
                           {/* Mảng Chuyên Môn */}
@@ -448,7 +343,7 @@ export default function TraCuuThanhVienPage() {
                           <div className="p-3 rounded-lg border border-slate-100">
                             <QRCodeSVG
                               ref={qrSearchRef}
-                              value={demo ? 'DEMO-' + searchedMember.studentId : searchedMember.studentId}
+                              value={searchedMember.studentId}
                               size={150}
                               level="H"
                               includeMargin={false}
@@ -457,7 +352,7 @@ export default function TraCuuThanhVienPage() {
                           <div className="space-y-0.5">
                             <p className="text-sm font-bold text-ink">Mã QR Định Danh</p>
                             <p className="text-[11px] text-muted-ink max-w-[190px] leading-tight mx-auto">
-                              {demo ? 'Mã QR minh họa cho bản tra cứu mẫu.' : 'Xuất trình mã này cho Ban cán sự khi điểm danh hoạt động'}
+                              Xuất trình mã này khi điểm danh hoạt động.
                             </p>
                           </div>
                           <button

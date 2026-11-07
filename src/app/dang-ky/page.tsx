@@ -1,4 +1,5 @@
 'use client';
+import { registrationCount } from '@/lib/registration-count';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -20,7 +21,7 @@ export interface ActivityRegisterItem {
   ngayDang: string;
   startDate?: string;
   endDate?: string;
-  soNguoiDangKy: number;
+  soNguoiDangKy: number | null;
   maxParticipants: number;
   isOpen: boolean;
   rawTime?: number;
@@ -83,6 +84,7 @@ function formatToVietnameseDate(dateVal?: string): string {
 
 export default function DanhSachDangKyPage() {
   const [activities, setActivities] = useState<ActivityRegisterItem[]>([]);
+  const [loadError,setLoadError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [mousePos, setMousePos] = useState({ x: 600, y: 300 });
@@ -172,17 +174,12 @@ export default function DanhSachDangKyPage() {
     const fetchActivities = async () => {
       try {
         setLoading(true);
-        const [formsSnap, actRegSnap] = await Promise.all([
-          getDocs(collection(db, 'activity_forms')).catch(() => ({ docs: [] })),
-          getDocs(collection(db, 'activity_registrations')).catch(() => ({ docs: [] })),
-        ]);
-
-        const allRegistrations = actRegSnap.docs.map((d) => d.data());
+        const formsSnap = await getDocs(collection(db, 'activity_forms'));
         const list: ActivityRegisterItem[] = [];
 
-        formsSnap.docs.forEach((d) => {
+        await Promise.all(formsSnap.docs.map(async (d) => {
           const data = d.data() as any;
-          const regCount = allRegistrations.filter((r: any) => r.activityId === d.id).length;
+          const regCount = await registrationCount(d.id);
           const rawDateStr = data.dateStr || data.ngayDang || '';
 
           list.push({
@@ -198,12 +195,12 @@ export default function DanhSachDangKyPage() {
             isOpen: data.isOpen !== undefined ? data.isOpen : true,
             rawTime: parseDateToTimestamp(rawDateStr, data.createdAt),
           });
-        });
+        }));
 
         list.sort((a, b) => (b.rawTime || 0) - (a.rawTime || 0));
         setActivities(list);
       } catch (err) {
-        console.error('Lỗi khi tải hoạt động:', err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -318,7 +315,7 @@ export default function DanhSachDangKyPage() {
                 const isExpired = !isNaN(endTimestamp) && now > endTimestamp;
                 const isNotStarted = !isNaN(startTimestamp) && now < startTimestamp;
                 const hasLimit = item.maxParticipants > 0;
-                const isFull = hasLimit && item.soNguoiDangKy >= item.maxParticipants;
+                const isFull = hasLimit && item.soNguoiDangKy !== null && item.soNguoiDangKy >= item.maxParticipants;
                 const isClosed = !item.isOpen || isFull || isExpired || isNotStarted;
 
                 const formattedEndDate = formatToVietnameseDate(item.endDate);
@@ -393,7 +390,7 @@ export default function DanhSachDangKyPage() {
                         <div className="flex items-center gap-1.5">
                           <Users size={13} className="text-brand-ink" />
                           <span>
-                            {hasLimit ? (
+                            {item.soNguoiDangKy === null ? 'Chưa tải được số lượt đăng ký' : hasLimit ? (
                               <>
                                 <strong className={isFull ? 'text-rose-600' : 'text-ink'}>
                                   {item.soNguoiDangKy}/{item.maxParticipants}
@@ -437,8 +434,8 @@ export default function DanhSachDangKyPage() {
             </div>
           ) : (
             <div className="text-center py-16 bg-white/80 rounded-[32px] border border-dashed border-slate-200 text-muted-ink font-medium space-y-1.5 max-w-md mx-auto">
-              <p className="text-sm font-bold text-body-ink">Chưa có hoạt động mở đăng ký</p>
-              <p className="text-xs">Hiện tại danh sách biểu mẫu đang được cập nhật, vui lòng quay lại sau!</p>
+              <p className="text-sm font-bold text-body-ink">{loadError ? 'Chưa tải được danh sách đăng ký' : 'Chưa có hoạt động mở đăng ký'}</p>
+              <p className="text-xs">Bạn có thể quay lại sau để xem danh sách mới nhất.</p>
             </div>
           )}
 

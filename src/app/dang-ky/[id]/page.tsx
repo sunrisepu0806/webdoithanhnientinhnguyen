@@ -1,4 +1,5 @@
 'use client';
+import { registrationCount } from '@/lib/registration-count';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -109,7 +110,7 @@ export default function FormDangKyChiTietPage() {
   const activityId = Array.isArray(rawId) ? rawId[0] : (typeof rawId === 'string' ? rawId : '');
 
   const [activity, setActivity] = useState<any>(null);
-  const [currentRegisteredCount, setCurrentRegisteredCount] = useState<number>(0);
+  const [currentRegisteredCount, setCurrentRegisteredCount] = useState<number | null>(null);
   const [loadingActivity, setLoadingActivity] = useState(true);
 
   // Form State
@@ -217,7 +218,7 @@ export default function FormDangKyChiTietPage() {
             questions: Array.isArray(data.questions) ? data.questions : [],
             maxParticipants: Number(data.maxParticipants) || Number(data.gioiHanNguoi) || 0,
             isOpen: data.isOpen !== undefined ? data.isOpen : true,
-            zaloLink: data.zaloLink || data.linkZalo || 'https://zalo.me/g/volunteer-qnu',
+            zaloLink: data.zaloLink || data.linkZalo || '',
           });
         } else {
           setActivity(null);
@@ -231,10 +232,7 @@ export default function FormDangKyChiTietPage() {
 
     const fetchRegisteredCount = async () => {
       try {
-        const actRegSnap = await getDocs(
-          query(collection(db, 'activity_registrations'), where('activityId', '==', activityId))
-        );
-        setCurrentRegisteredCount(actRegSnap.size);
+        setCurrentRegisteredCount(await registrationCount(activityId));
       } catch (e) {
         console.warn(e);
       }
@@ -514,7 +512,7 @@ export default function FormDangKyChiTietPage() {
       });
 
       setSuccess(true);
-      setCurrentRegisteredCount((prev) => prev + 1);
+      setCurrentRegisteredCount((prev) => prev === null ? null : prev + 1);
     } catch (err: any) {
       console.error('Lỗi khi gửi form:', err);
       setErrorMsg('Có lỗi xảy ra khi gửi form đăng ký. Vui lòng thử lại!');
@@ -523,7 +521,7 @@ export default function FormDangKyChiTietPage() {
     }
   };
 
-  const isFull = activity && activity.maxParticipants > 0 && currentRegisteredCount >= activity.maxParticipants;
+  const isFull = activity && activity.maxParticipants > 0 && currentRegisteredCount !== null && currentRegisteredCount >= activity.maxParticipants;
   const isClosed = activity && (!activity.isOpen || isFull);
 
   if (loadingActivity) {
@@ -604,9 +602,9 @@ export default function FormDangKyChiTietPage() {
                 <span className="flex items-center gap-1.5">
                   <Users size={14} className="text-brand-ink" /> 
                   {activity.maxParticipants > 0 ? (
-                    <span>Chỉ tiêu: <strong className="text-ink">{currentRegisteredCount}/{activity.maxParticipants}</strong> người</span>
+                    <span>Chỉ tiêu: <strong className="text-ink">{currentRegisteredCount ?? '—'}/{activity.maxParticipants}</strong> người</span>
                   ) : (
-                    <span>Đã đăng ký: <strong className="text-ink">{currentRegisteredCount}</strong> người</span>
+                    <span>Đã đăng ký: <strong className="text-ink">{currentRegisteredCount ?? '—'}</strong> người</span>
                   )}
                 </span>
               </div>
@@ -661,7 +659,7 @@ export default function FormDangKyChiTietPage() {
                 </button>
               </div>
 
-              <div className="pt-2">
+              {activity.zaloLink && (<div className="pt-2">
                 <a
                   href={activity.zaloLink}
                   target="_blank"
@@ -672,7 +670,7 @@ export default function FormDangKyChiTietPage() {
                   <MessageCircle size={18} />
                   <span>Tham Gia Nhóm Zalo Hoạt Động</span>
                 </a>
-              </div>
+              </div>)}
 
               <div className="pt-2">
                 <Link

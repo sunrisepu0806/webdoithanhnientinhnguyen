@@ -79,7 +79,7 @@ export default function ChanTrang() {
                   href="mailto:doithanhnientinhnguyenqnu23@gmail.com"
                   className="hover:text-inverse-link transition-colors truncate"
                 >
-                  doitntnqnu2023@gmail.com
+                  doithanhnientinhnguyenqnu23@gmail.com
                 </a>
               </p>
             </div>
