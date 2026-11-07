@@ -315,7 +315,7 @@ export default function TrangChu() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
               <Link
                 href="/tracuu"
-                className="group inline-flex min-h-11 items-center gap-3 rounded-md bg-sky-600 px-5 text-sm font-semibold text-white shadow-sm shadow-sky-700/20 transition-colors hover:bg-sky-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600 active:bg-sky-800"
+                className="group inline-flex min-h-11 items-center gap-3 rounded-full bg-sky-600 px-5 text-sm font-semibold text-white shadow-sm shadow-sky-700/20 transition-colors hover:bg-sky-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600 active:bg-sky-800"
               >
                 Tra cứu sinh viên
                 <ArrowRight size={17} aria-hidden="true" className="motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" />
