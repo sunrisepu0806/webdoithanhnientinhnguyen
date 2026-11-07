@@ -11,6 +11,9 @@ const navLinks = [
   { name: 'Giới thiệu', href: '/gioi-thieu' },
 ];
 
+const registrationLink = { name: 'Đăng ký hoạt động', href: '/dang-ky' };
+const mobileLinks = [...navLinks, registrationLink];
+
 export default function ThanhDieuHuong() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,10 +108,10 @@ export default function ThanhDieuHuong() {
         <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Nút Đăng Ký với hiệu ứng Shimmer */}
           <Link
-            href="/dang-ky"
+            href={registrationLink.href}
             className="whitespace-nowrap px-4 py-2.5 lg:py-2 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold transition-colors"
           >
-            <span className="relative z-10">Đăng Ký</span>
+            <span className="relative z-10">Đăng ký</span>
           </Link>
 
           {/* Nút Hamburger cho Mobile */}
@@ -162,8 +165,8 @@ export default function ThanhDieuHuong() {
       >
         <div className="flex flex-col h-full justify-between px-6 py-6 overflow-y-auto">
           <nav className="flex flex-col space-y-2">
-            {navLinks.map((link, idx) => {
-              const isActive = pathname === link.href;
+            {mobileLinks.map((link, idx) => {
+              const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
               return (
                 <Link
                   key={link.name}
