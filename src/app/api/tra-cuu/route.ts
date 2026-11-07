@@ -1,11 +1,11 @@
 type Activity = {date:string;shift:string;name:string;type:string;units:number;points:number};
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
+  if (params.has('view')) return new Response(null,{status:404});
   const id = (params.get('mssv') || '').trim();
   if (!/^[A-Za-z0-9_-]{4,24}$/.test(id)) return Response.json({member:null}, {headers:{'Cache-Control':'no-store'}});
   const url = new URL('https://dtntnqnu.vercel.app/api/public/member-report');
   url.searchParams.set('mssv',id);
-  if (params.get('view') === 'admission') url.searchParams.set('view','admission');
   let payload;
   try {
     const response = await fetch(url,{cache:'no-store'});

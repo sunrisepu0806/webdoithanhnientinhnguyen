@@ -10,7 +10,7 @@ interface Ripple {
 
 export default function TrangChu() {
   const cacCauSlogan = [
-    'Tra cứu số buổi tham gia, điểm hoạt động và kết quả tuyển thành viên.',
+    'Tra cứu số buổi tham gia và điểm hoạt động.',
     'Kết nối sức trẻ, lan tỏa yêu thương',
     'Nhiệt huyết – Tiên phong – Phụng sự cộng đồng',
   ];
@@ -319,12 +319,6 @@ export default function TrangChu() {
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
                 <span className="relative z-10">Tra cứu sinh viên</span>
               </Link>
-              <a
-                href="/ketquatrungtuyen"
-                className="px-6 sm:px-8 py-3 rounded-full bg-white hover:bg-slate-50 text-body-ink font-bold text-xs sm:text-sm shadow-sm hover:shadow border border-slate-200 hover:scale-105 transition-all duration-200 active:scale-95"
-              >
-                Kết quả trúng tuyển
-              </a>
             </div>
           </div>
 
