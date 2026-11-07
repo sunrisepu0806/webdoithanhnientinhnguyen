@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="vi" style={{ colorScheme: 'light' }} className="light">
       <body 
         style={{ colorScheme: 'light' }} 
-        className="min-h-screen flex flex-col justify-between bg-white text-slate-800 antialiased selection:bg-[#0284c7] selection:text-white"
+        className="min-h-screen flex flex-col justify-between bg-white text-body-ink antialiased selection:bg-[#0284c7] selection:text-white"
       >
         <Header />
         

@@ -12,17 +12,54 @@ import {
   where, 
   limit 
 } from 'firebase/firestore';
-import { getGroupLink, getDeptLinksList } from '@/data/groupLinks';
+import { getDeptLinksList } from '@/data/groupLinks';
 
 export interface MemberItem {
   id?: string;
   studentId: string;
   fullName: string;
   major: string;
+  groupSessions?: number;
+  departmentSessions?: number;
+  totalSessions?: number;
+  totalPoints?: number;
   group?: string;
   department?: string;
   dob?: string;
   createdAt?: string;
+}
+
+function AttendanceSummary({ member }: { member: MemberItem }) {
+  const sessions = member.totalSessions ?? (
+    typeof member.groupSessions === 'number' && typeof member.departmentSessions === 'number'
+      ? member.groupSessions + member.departmentSessions
+      : undefined
+  );
+  const metrics = [
+    { label: 'Tổng số buổi', value: sessions, unit: 'buổi' },
+    { label: 'Tổng điểm', value: member.totalPoints, unit: 'điểm' },
+    { label: 'Hoạt động Đội', value: member.groupSessions, unit: 'buổi' },
+    { label: 'Công việc mảng', value: member.departmentSessions, unit: 'buổi' },
+  ];
+  return (
+    <section aria-labelledby="attendance-title">
+      <h3 id="attendance-title" className="mb-3 text-lg font-bold text-ink">Kết quả tham gia</h3>
+      <dl className="grid grid-cols-2 gap-2.5 sm:gap-3">
+        {metrics.map(({ label, value, unit }, index) => (
+          <div key={label} className={index < 2
+            ? 'rounded-2xl bg-sky-700 p-4 text-white'
+            : 'rounded-2xl border border-sky-100 bg-sky-50 p-4 text-brand-strong'}>
+            <dt className="text-sm font-medium">{label}</dt>
+            <dd className="mt-2">
+              {value != null && Number.isFinite(Number(value)) && String(value).trim() !== '' ? (
+                <><strong className="text-3xl font-bold tabular-nums">{Number(value)}</strong> <span className="text-sm">{unit}</span></>
+              ) : <span className="text-sm">Chưa cập nhật</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
 }
 
 interface Ripple {
@@ -72,14 +109,16 @@ function formatCreatedAt(createdAt: any): string {
 }
 
 export default function TraCuuThanhVienPage() {
+  const [demo, setDemo] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   // State Tra cứu
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchedMember, setSearchedMember] = useState<MemberItem | null>(null);
+  const [submittedId, setSubmittedId] = useState('');
+  const [lookupFailed, setLookupFailed] = useState(false);
   const [isSearched, setIsSearched] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const qrSearchRef = useRef<SVGSVGElement | null>(null);
 
@@ -89,6 +128,7 @@ export default function TraCuuThanhVienPage() {
   const [ripples, setRipples] = useState<Ripple[]>([]);
 
   useEffect(() => {
+    setDemo(new URLSearchParams(window.location.search).get('mau') === '1');
     setIsMounted(true);
   }, []);
 
@@ -121,14 +161,23 @@ export default function TraCuuThanhVienPage() {
     const rawKey = searchKeyword.trim();
     if (!rawKey) return;
 
+    setSubmittedId(rawKey);
+    setLookupFailed(false);
     setSearchLoading(true);
     setIsSearched(true);
-    setCopiedKey(null);
 
     // Biến đếm lượt đọc Firestore
     let readsCount = 0;
 
     try {
+      if (demo) {
+        const response = await fetch('/api/tra-cuu-mau?mssv=' + encodeURIComponent(rawKey));
+        if (!response.ok) throw new Error('Demo lookup failed');
+        const { member } = await response.json();
+        setSearchedMember(member);
+        return;
+      }
+
       let targetDoc: any = null;
       let targetData: any = null;
 
@@ -184,6 +233,10 @@ export default function TraCuuThanhVienPage() {
 
       setSearchedMember({
         id: targetDoc.id,
+        groupSessions: targetData.groupSessions,
+        departmentSessions: targetData.departmentSessions,
+        totalSessions: targetData.soBuoiDiemDanh ?? targetData.totalSessions,
+        totalPoints: targetData.totalPoints,
         studentId: sid,
         fullName: String(targetData.name || targetData.fullName || targetData.hoTen || '').trim(),
         major: String(targetData.majorAndClass || targetData.major || targetData.nganhHoc || targetData.lop || '').trim(),
@@ -194,6 +247,7 @@ export default function TraCuuThanhVienPage() {
       });
 
     } catch (err) {
+      setLookupFailed(true);
       console.error("Lỗi tra cứu:", err);
       setSearchedMember(null);
     } finally {
@@ -224,19 +278,12 @@ export default function TraCuuThanhVienPage() {
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  const handleCopy = (text: string, keyId: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(keyId);
-    setTimeout(() => setCopiedKey(null), 2000);
-  };
-
   if (!isMounted) return null;
 
-  const groupUrl = searchedMember ? getGroupLink(searchedMember.group) : '';
   const deptList = searchedMember ? getDeptLinksList(searchedMember.department) : [];
 
   return (
-    <div className="flex flex-col select-none font-sans overflow-x-hidden min-h-screen bg-slate-50" suppressHydrationWarning>
+    <div className="flex flex-col font-sans overflow-x-hidden bg-slate-50" suppressHydrationWarning>
       <style jsx global>{`
         @keyframes rippleCompact {
           0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.9; }
@@ -274,7 +321,7 @@ export default function TraCuuThanhVienPage() {
         ref={containerRef}
         onClick={handleContainerClick}
         onMouseMove={handleMouseMove}
-        className="relative min-h-screen flex flex-col justify-between overflow-hidden cursor-default flex-1"
+        className="relative min-h-[70svh] flex flex-col justify-between overflow-hidden cursor-default flex-1"
       >
         {ripples.map((ripple) => (
           <span key={ripple.id} className="ripple-circle" style={{ left: `${ripple.x}px`, top: `${ripple.y}px` }} />
@@ -290,176 +337,107 @@ export default function TraCuuThanhVienPage() {
         <div className="pointer-events-none absolute top-1/2 -right-32 h-[500px] w-[500px] rounded-full bg-blue-300/15 blur-[120px] animate-aurora-glow" style={{ animationDelay: '-4s' }} />
 
         {/* Khung nội dung */}
-        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-12 pb-16 flex-1 flex flex-col justify-start">
+        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-10 flex-1 flex flex-col justify-start">
           
-          <div className="mb-10 text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-sky-600 drop-shadow-sm uppercase">
-              Tra Cứu Link Nhóm
+          <div className="mb-7 sm:mb-9 text-center space-y-3">
+            <p className="text-xs font-semibold tracking-widest text-brand-ink">{demo ? 'BẢN TRA CỨU MẪU' : 'DÀNH CHO THÀNH VIÊN'}</p>
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-brand-ink">
+              Tra cứu thành viên
             </h1>
-            <p className="mx-auto max-w-lg text-sm sm:text-base text-slate-500 font-medium">
-              Nhập mã số sinh viên để nhận liên kết vào nhóm Tổ và các Mảng hoạt động của bạn.
+            <p className="mx-auto max-w-lg text-sm sm:text-base text-muted-ink font-medium">
+              {demo ? 'Nhập mã 9900000001 hoặc 9900000002 để xem hồ sơ thành viên giả lập.' : 'Nhập mã số sinh viên để xem số buổi tham gia, tổng điểm và mã QR điểm danh.'}
             </p>
           </div>
 
           <div className="w-full max-w-4xl mx-auto space-y-8">
             {/* Form Tra Cứu */}
-            <form onSubmit={handleSearch} className="max-w-xl mx-auto bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex items-center gap-2 transition-all focus-within:border-sky-400">
-              <div className="relative flex-1 flex items-center pl-3">
-                <svg className="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <form role="search" aria-label="Tra cứu thành viên theo mã số sinh viên" onSubmit={handleSearch} className="max-w-xl mx-auto bg-white rounded-full p-1.5 sm:p-2 border border-sky-200 shadow-md shadow-sky-900/5 flex items-center gap-2 transition-all focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+              <div className="relative min-w-0 flex-1 flex items-center pl-2 sm:pl-4">
+                <svg className="w-5 h-5 text-muted-ink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <input
                   type="text"
                   required
-                  placeholder="Nhập MSSV (ví dụ: 4751130041)..."
-                  className="w-full pl-3 pr-4 py-2 bg-transparent focus:outline-none text-sm font-semibold text-slate-800 placeholder:text-slate-400"
+                  aria-label="Mã số sinh viên" placeholder="Nhập mã số sinh viên"
+                  className="w-full min-w-0 pl-2 pr-1 py-2 bg-transparent focus:outline-none text-base font-medium text-ink placeholder:text-muted-ink"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                 />
               </div>
               <button
                 type="submit"
-                disabled={searchLoading}
-                className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-sm transition-all active:scale-95 flex items-center justify-center shrink-0 disabled:opacity-70 disabled:active:scale-100 min-w-[110px]"
+                disabled={searchLoading} aria-label={searchLoading ? "Đang tra cứu" : "Tra cứu"}
+                className="px-4 sm:px-6 min-h-11 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-full text-sm transition-all active:scale-95 flex items-center justify-center shrink-0 disabled:opacity-70 disabled:active:scale-100 sm:min-w-[110px]"
               >
-                {searchLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Tra Cứu'}
+                {searchLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Tra cứu'}
               </button>
             </form>
 
             {/* CHỈ XUẤT HIỆN KHI ĐÃ BẤM TRA CỨU */}
-            {isSearched && (
+            {searchLoading && <p role="status" className="text-center text-sm text-muted-ink">Đang tìm thông tin thành viên…</p>}
+            {isSearched && !searchLoading && (
               <div className="animate-in fade-in duration-200">
                 {searchedMember ? (
-                  <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+                  <div className="bg-white rounded-2xl p-4 sm:p-8 border border-slate-200/80 shadow-sm">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                       
-                      {/* Cột Trái: Thông tin & Link nhóm */}
+                      {/* Cột Trái: Thông tin thành viên */}
                       <div className="lg:col-span-8 space-y-6">
                         <div className="pb-4 border-b border-slate-100">
-                          <span className="inline-block px-2.5 py-0.5 bg-sky-100 text-sky-700 text-xs font-semibold rounded-md mb-2">
+                          <span className="inline-block px-2.5 py-0.5 bg-sky-100 text-brand-ink text-xs font-semibold rounded-md mb-2">
                             Thành viên Đội TNTN
                           </span>
-                          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight leading-tight mb-1">
                             {searchedMember.fullName}
                           </h2>
-                          <p className="text-slate-500 text-sm font-medium">{searchedMember.major || "Chưa cập nhật ngành học"}</p>
+                          <p className="text-muted-ink text-sm font-medium">{searchedMember.major || "Chưa cập nhật ngành học"}</p>
                         </div>
+
+                        <AttendanceSummary member={searchedMember} />
+                        {demo && (
+                          <a href={`/api/tra-cuu-mau?mssv=${encodeURIComponent(searchedMember.studentId)}&format=xlsx`} download
+                            className="inline-flex rounded-full bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2">
+                            Xuất Excel chi tiết hoạt động
+                          </a>
+                        )}
 
                         {/* Bảng thông tin */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Mã Số Sinh Viên</span>
-                            <p className="font-mono font-bold text-slate-800 text-sm">{searchedMember.studentId}</p>
+                            <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">Mã Số Sinh Viên</span>
+                            <p className="font-mono font-bold text-ink text-sm">{searchedMember.studentId}</p>
                           </div>
                           
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày Sinh</span>
-                            <p className="font-mono font-bold text-slate-800 text-sm">{formatBirthDate(searchedMember.dob)}</p>
+                            <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">Ngày Sinh</span>
+                            <p className="font-mono font-bold text-ink text-sm">{formatBirthDate(searchedMember.dob)}</p>
                           </div>
 
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ngày Tham Gia</span>
-                            <p className="font-mono font-bold text-slate-800 text-sm">{searchedMember.createdAt || '27/04/2023'}</p>
+                            <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">Ngày Tham Gia</span>
+                            <p className="font-mono font-bold text-ink text-sm">{searchedMember.createdAt || '27/04/2023'}</p>
                           </div>
 
                           <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-sky-600 uppercase tracking-wider block mb-1">Tổ Hoạt Động</span>
-                            <p className="font-bold text-slate-800 text-sm">Tổ {searchedMember.group || '1'}</p>
+                            <span className="text-[11px] font-bold text-brand-ink uppercase tracking-wider block mb-1">Tổ Hoạt Động</span>
+                            <p className="font-bold text-ink text-sm">Tổ {searchedMember.group || '1'}</p>
                           </div>
 
                           {/* Mảng Chuyên Môn */}
                           <div className="col-span-1 sm:col-span-2 p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                            <span className="text-[11px] font-bold text-sky-600 uppercase tracking-wider block mb-1.5">Mảng Chuyên Môn</span>
+                            <span className="text-[11px] font-bold text-brand-ink uppercase tracking-wider block mb-1.5">Mảng Chuyên Môn</span>
                             <div className="flex flex-wrap gap-1.5">
                               {deptList.length > 0 ? (
                                 deptList.map((item, idx) => (
-                                  <span key={idx} className="inline-block px-2.5 py-1 rounded-lg bg-white text-slate-700 border border-slate-200 text-xs font-semibold">
+                                  <span key={idx} className="inline-block px-2.5 py-1 rounded-lg bg-white text-body-ink border border-slate-200 text-xs font-semibold">
                                     {item.name}
                                   </span>
                                 ))
                               ) : (
-                                <p className="font-semibold text-slate-800 text-sm">{searchedMember.department || 'Chưa cập nhật mảng'}</p>
+                                <p className="font-semibold text-ink text-sm">{searchedMember.department || 'Chưa cập nhật mảng'}</p>
                               )}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* LIÊN KẾT NHÓM ZALO */}
-                        <div className="p-4 sm:p-5 rounded-xl bg-slate-50/70 border border-slate-200/70 space-y-3">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-sky-500" />
-                            Liên Kết Nhóm Zalo Dành Riêng Cho Bạn
-                          </h4>
-
-                          <div className="space-y-2.5">
-                            {/* Nhóm Tổ */}
-                            {groupUrl && (
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200">
-                                <div>
-                                  <div className="font-bold text-slate-800 text-sm">Nhóm Zalo Tổ {searchedMember.group}</div>
-                                  <div className="text-xs text-slate-400">Dành riêng cho thành viên Tổ {searchedMember.group}</div>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCopy(groupUrl, 'to')}
-                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition"
-                                  >
-                                    {copiedKey === 'to' ? "Đã copy" : "Copy"}
-                                  </button>
-                                  <a
-                                    href={groupUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-4 py-1.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg text-xs transition flex items-center gap-1.5"
-                                  >
-                                    <span>Vào Nhóm</span>
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                  </a>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Các Nhóm Mảng Chuyên Môn */}
-                            {deptList.map((item, idx) => {
-                              const deptKey = `dept-${idx}`;
-                              return (
-                                <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200">
-                                  <div>
-                                    <div className="font-bold text-slate-800 text-sm">Nhóm Zalo: {item.name}</div>
-                                    <div className="text-xs text-slate-400">Mảng chuyên môn của bạn</div>
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    {item.link ? (
-                                      <>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleCopy(item.link!, deptKey)}
-                                          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition"
-                                        >
-                                          {copiedKey === deptKey ? "Đã copy" : "Copy"}
-                                        </button>
-                                        <a
-                                          href={item.link}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition flex items-center gap-1.5"
-                                        >
-                                          <span>Vào Nhóm</span>
-                                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                          </svg>
-                                        </a>
-                                      </>
-                                    ) : (
-                                      <span className="text-xs text-slate-400 italic py-1">Chưa cập nhật link</span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
                           </div>
                         </div>
                       </div>
@@ -470,16 +448,16 @@ export default function TraCuuThanhVienPage() {
                           <div className="p-3 rounded-lg border border-slate-100">
                             <QRCodeSVG
                               ref={qrSearchRef}
-                              value={searchedMember.studentId}
+                              value={demo ? 'DEMO-' + searchedMember.studentId : searchedMember.studentId}
                               size={150}
                               level="H"
                               includeMargin={false}
                             />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-sm font-bold text-slate-800">Mã QR Định Danh</p>
-                            <p className="text-[11px] text-slate-500 max-w-[190px] leading-tight mx-auto">
-                              Xuất trình mã này cho Ban cán sự khi điểm danh hoạt động
+                            <p className="text-sm font-bold text-ink">Mã QR Định Danh</p>
+                            <p className="text-[11px] text-muted-ink max-w-[190px] leading-tight mx-auto">
+                              {demo ? 'Mã QR minh họa cho bản tra cứu mẫu.' : 'Xuất trình mã này cho Ban cán sự khi điểm danh hoạt động'}
                             </p>
                           </div>
                           <button
@@ -499,9 +477,9 @@ export default function TraCuuThanhVienPage() {
                 ) : (
                   <div className="max-w-xl mx-auto bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm">
                     <div className="w-10 h-10 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3 text-lg font-bold">!</div>
-                    <h3 className="font-bold text-slate-900 text-base mb-1">Không Tìm Thấy Kết Quả</h3>
-                    <p className="text-sm text-slate-500">
-                      Không tìm thấy thành viên mang mã <strong>"{searchKeyword}"</strong>. Vui lòng kiểm tra lại chính xác Mã số sinh viên.
+                    <h3 className="font-bold text-ink text-base mb-1">{lookupFailed ? "Chưa thể tra cứu" : "Không tìm thấy kết quả"}</h3>
+                    <p className="text-sm text-muted-ink">
+                      {lookupFailed ? "Vui lòng thử lại sau ít phút." : <>Không tìm thấy thành viên có mã <strong>{submittedId}</strong>. Bạn kiểm tra lại mã số sinh viên nhé.</>}
                     </p>
                   </div>
                 )}

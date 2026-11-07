@@ -32,21 +32,21 @@ function renderFormattedContent(text: string) {
 
   return paragraphs.map((para, pIdx) => {
     const html = para
-      .replace(/\[b\](.*?)\[\/b\]/gi, '<strong class="font-extrabold text-slate-900">$1</strong>')
-      .replace(/\[i\](.*?)\[\/i\]/gi, '<em class="italic text-slate-700">$1</em>')
+      .replace(/\[b\](.*?)\[\/b\]/gi, '<strong class="font-extrabold text-ink">$1</strong>')
+      .replace(/\[i\](.*?)\[\/i\]/gi, '<em class="italic text-body-ink">$1</em>')
       .replace(/\[u\](.*?)\[\/u\]/gi, '<u class="underline decoration-[#0284c7] decoration-2">$1</u>')
-      .replace(/\[blue\](.*?)\[\/blue\]/gi, '<span class="text-[#0284c7] font-semibold">$1</span>')
+      .replace(/\[blue\](.*?)\[\/blue\]/gi, '<span class="text-brand-ink font-semibold">$1</span>')
       .replace(/\[red\](.*?)\[\/red\]/gi, '<span class="text-rose-600 font-semibold">$1</span>')
       .replace(/\[green\](.*?)\[\/green\]/gi, '<span class="text-emerald-600 font-semibold">$1</span>')
       .replace(/\[orange\](.*?)\[\/orange\]/gi, '<span class="text-amber-500 font-semibold">$1</span>')
       .replace(/\[purple\](.*?)\[\/purple\]/gi, '<span class="text-purple-600 font-semibold">$1</span>')
-      .replace(/\[quote\](.*?)\[\/quote\]/gi, '<div class="p-4 my-4 border-l-4 border-[#0284c7] bg-blue-50/80 text-slate-800 font-medium italic rounded-r-2xl shadow-xs leading-relaxed clear-both">$1</div>')
-      .replace(/\[list\](.*?)\[\/list\]/gi, '<div class="flex items-start gap-2.5 my-2.5 text-slate-700"><span class="text-[#0284c7] font-black text-base leading-none">•</span><span>$1</span></div>');
+      .replace(/\[quote\](.*?)\[\/quote\]/gi, '<div class="p-4 my-4 border-l-4 border-[#0284c7] bg-blue-50/80 text-ink font-medium italic rounded-r-2xl shadow-xs leading-relaxed clear-both">$1</div>')
+      .replace(/\[list\](.*?)\[\/list\]/gi, '<div class="flex items-start gap-2.5 my-2.5 text-body-ink"><span class="text-brand-ink font-black text-base leading-none">•</span><span>$1</span></div>');
 
     return (
       <div
         key={pIdx}
-        className="text-sm sm:text-base leading-relaxed text-slate-700 text-justify mb-4 font-sans"
+        className="text-sm sm:text-base leading-relaxed text-body-ink text-justify mb-4 font-sans"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     );
@@ -292,16 +292,16 @@ export default function ChiTietHoatDongPage() {
 
         {/* KHỐI NỘI DUNG CHÍNH */}
         {loading ? (
-          <div className="flex-1 flex items-center justify-center relative z-20 py-24 text-slate-400">
+          <div className="flex-1 flex items-center justify-center relative z-20 py-24 text-muted-ink">
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-4 border-[#0284c7] border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Đang tải nội dung...</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-ink">Đang tải nội dung...</p>
             </div>
           </div>
         ) : !post ? (
           <div className="flex-1 flex flex-col items-center justify-center relative z-20 space-y-4 p-6 py-24">
-            <h2 className="text-2xl font-black text-slate-800">Không tìm thấy bài viết!</h2>
-            <p className="text-xs text-slate-400">Bài viết không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
+            <h2 className="text-2xl font-black text-ink">Không tìm thấy bài viết!</h2>
+            <p className="text-xs text-muted-ink">Bài viết không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
             <Link href="/hoat-dong" className="px-6 py-3 bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition shadow-md">
               Quay lại danh sách
             </Link>
@@ -313,7 +313,7 @@ export default function ChiTietHoatDongPage() {
             <div>
               <Link
                 href="/hoat-dong"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0284c7] transition"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-ink hover:text-brand-ink transition"
               >
                 <ArrowLeft size={14} /> Quay lại danh sách hoạt động
               </Link>
@@ -322,18 +322,18 @@ export default function ChiTietHoatDongPage() {
             {isImageCenter ? (
               <div className="space-y-6">
                 <div className="space-y-2 border-b border-slate-200 pb-4">
-                  <h1 className="text-3xl sm:text-4xl md:text-[42px] font-black text-[#0284c7] tracking-tight leading-tight uppercase">
+                  <h1 className="text-3xl sm:text-4xl md:text-[42px] font-black text-brand-ink tracking-tight leading-tight uppercase">
                     {post.tieuDe}
                   </h1>
 
-                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 pt-1">
+                  <div className="flex items-center gap-4 text-xs font-semibold text-muted-ink pt-1">
                     {post.ngayDang && (
                       <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-[#0284c7]" /> {post.ngayDang}
+                        <Calendar size={13} className="text-brand-ink" /> {post.ngayDang}
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <Eye size={13} className="text-[#0284c7]" /> {post.luotXem || 0} lượt xem
+                      <Eye size={13} className="text-brand-ink" /> {post.luotXem || 0} lượt xem
                     </span>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export default function ChiTietHoatDongPage() {
                   </div>
                 )}
 
-                <div className="space-y-4 max-w-4xl text-slate-700">
+                <div className="space-y-4 max-w-4xl text-body-ink">
                   {renderFormattedContent(post.noiDung)}
                 </div>
               </div>
@@ -363,18 +363,18 @@ export default function ChiTietHoatDongPage() {
                 
                 {/* Tiêu đề & Ngày đăng */}
                 <div className="space-y-2 max-w-3xl">
-                  <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] font-black text-[#0284c7] tracking-tight leading-tight">
+                  <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] font-black text-brand-ink tracking-tight leading-tight">
                     {post.tieuDe}
                   </h1>
 
-                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 pt-1">
+                  <div className="flex items-center gap-4 text-xs font-semibold text-muted-ink pt-1">
                     {post.ngayDang && (
                       <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-[#0284c7]" /> {post.ngayDang}
+                        <Calendar size={13} className="text-brand-ink" /> {post.ngayDang}
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <Eye size={13} className="text-[#0284c7]" /> {post.luotXem || 0} lượt xem
+                      <Eye size={13} className="text-brand-ink" /> {post.luotXem || 0} lượt xem
                     </span>
                   </div>
                 </div>
@@ -399,7 +399,7 @@ export default function ChiTietHoatDongPage() {
                     </div>
                   </div>
 
-                  <div className="text-slate-700">
+                  <div className="text-body-ink">
                     {renderFormattedContent(post.noiDung)}
                   </div>
 
@@ -412,9 +412,9 @@ export default function ChiTietHoatDongPage() {
             {/* Danh sách ảnh phụ */}
             {post.danhSachAnhPhu && post.danhSachAnhPhu.length > 0 && (
               <div className="pt-8 border-t border-slate-200/80 space-y-5 clear-both">
-                <h3 className="text-xl font-black text-[#0284c7] uppercase tracking-wide flex items-center gap-2">
+                <h3 className="text-xl font-black text-brand-ink uppercase tracking-wide flex items-center gap-2">
                   <span>HÌNH ẢNH HOẠT ĐỘNG</span>
-                  <span className="text-xs font-extrabold text-[#0284c7] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                  <span className="text-xs font-extrabold text-brand-ink bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
                     {post.danhSachAnhPhu.length}
                   </span>
                 </h3>

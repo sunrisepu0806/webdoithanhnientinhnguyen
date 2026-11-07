@@ -291,10 +291,10 @@ export default function TraCuuTrungTuyenPage() {
         {/* Khung nội dung */}
         <div className="relative z-20 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-12 pb-16 flex-1 flex flex-col justify-start">
           <div className="mb-10 text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-sky-600 drop-shadow-sm uppercase">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-brand-ink drop-shadow-sm uppercase">
               Tra Cứu Kết Quả Trúng Tuyển
             </h1>
-            <p className="mx-auto max-w-lg text-sm sm:text-base text-slate-500 font-medium">
+            <p className="mx-auto max-w-lg text-sm sm:text-base text-muted-ink font-medium">
               Nhập mã số sinh viên của bạn để kiểm tra kết quả phỏng vấn và nhận liên kết vào nhóm chung của Đội cùng nhóm Tổ hoạt động.
             </p>
           </div>
@@ -306,14 +306,14 @@ export default function TraCuuTrungTuyenPage() {
               className="max-w-xl mx-auto bg-white rounded-xl p-2.5 border border-slate-200 shadow-sm flex items-center gap-2 transition-all focus-within:border-sky-400"
             >
               <div className="relative flex-1 flex items-center pl-3">
-                <svg className="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-muted-ink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
                   type="text"
                   required
                   placeholder="Nhập MSSV (ví dụ: 4951050001)..."
-                  className="w-full pl-3 pr-4 py-2 bg-transparent focus:outline-none text-sm font-semibold text-slate-800 placeholder:text-slate-400"
+                  className="w-full pl-3 pr-4 py-2 bg-transparent focus:outline-none text-sm font-semibold text-ink placeholder:text-muted-ink"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                 />
@@ -363,10 +363,10 @@ export default function TraCuuTrungTuyenPage() {
                               <p className="text-xs font-semibold text-emerald-600 mb-1">
                                 Chào mừng bạn chính thức gia nhập ngôi nhà chung Đội Thanh niên Tình nguyện QNU!
                               </p>
-                              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                              <h2 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight leading-tight mb-1">
                                 {searchedResult.fullName}
                               </h2>
-                              <p className="text-slate-500 text-sm font-medium">
+                              <p className="text-muted-ink text-sm font-medium">
                                 {searchedResult.major || 'Chưa cập nhật ngành học'}
                               </p>
                             </div>
@@ -374,17 +374,17 @@ export default function TraCuuTrungTuyenPage() {
                             {/* Bảng thông tin phân công (4 ô cân đối) */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                               <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                                <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">
                                   Mã Số SV
                                 </span>
-                                <p className="font-mono font-bold text-slate-800 text-sm">{searchedResult.studentId}</p>
+                                <p className="font-mono font-bold text-ink text-sm">{searchedResult.studentId}</p>
                               </div>
 
                               <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                                <span className="text-[11px] font-bold text-muted-ink uppercase tracking-wider block mb-1">
                                   Ngày Sinh
                                 </span>
-                                <p className="font-mono font-bold text-slate-800 text-sm">
+                                <p className="font-mono font-bold text-ink text-sm">
                                   {formatBirthDate(searchedResult.dob)}
                                 </p>
                               </div>
@@ -397,10 +397,10 @@ export default function TraCuuTrungTuyenPage() {
                               </div>
 
                               <div className="p-3.5 rounded-xl bg-sky-50/60 border border-sky-100">
-                                <span className="text-[11px] font-bold text-sky-600 uppercase tracking-wider block mb-1">
+                                <span className="text-[11px] font-bold text-brand-ink uppercase tracking-wider block mb-1">
                                   Tổ Hoạt Động
                                 </span>
-                                <p className="font-bold text-slate-800 text-sm">Tổ {searchedResult.group || '1'}</p>
+                                <p className="font-bold text-ink text-sm">Tổ {searchedResult.group || '1'}</p>
                               </div>
                             </div>
 
@@ -415,7 +415,7 @@ export default function TraCuuTrungTuyenPage() {
 
                             {/* BƯỚC TIẾP THEO: VÀO NHÓM ZALO CHÍNH & NHÓM TỔ */}
                             <div className="p-4 sm:p-5 rounded-xl bg-slate-50/70 border border-slate-200/70 space-y-3">
-                              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-body-ink flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                                 Bước Tiếp Theo: Tham Gia Đầy Đủ 2 Nhóm Zalo Dưới Đây
                               </h4>
@@ -424,10 +424,10 @@ export default function TraCuuTrungTuyenPage() {
                                 {/* 1. Nhóm Zalo Chính của Đội */}
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200">
                                   <div>
-                                    <div className="font-bold text-slate-800 text-sm">
+                                    <div className="font-bold text-ink text-sm">
                                       Nhóm Zalo Chính Đội TNTN
                                     </div>
-                                    <div className="text-xs text-slate-400">
+                                    <div className="text-xs text-muted-ink">
                                       Nhóm thông báo chung dành cho toàn bộ thành viên Đội
                                     </div>
                                   </div>
@@ -435,7 +435,7 @@ export default function TraCuuTrungTuyenPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleCopy(MAIN_ZALO_GROUP_URL, 'main')}
-                                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition"
+                                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-muted-ink font-semibold rounded-lg text-xs transition"
                                     >
                                       {copiedKey === 'main' ? 'Đã copy' : 'Copy'}
                                     </button>
@@ -457,10 +457,10 @@ export default function TraCuuTrungTuyenPage() {
                                 {groupUrl && (
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200">
                                     <div>
-                                      <div className="font-bold text-slate-800 text-sm">
+                                      <div className="font-bold text-ink text-sm">
                                         Nhóm Zalo Tổ {searchedResult.group}
                                       </div>
-                                      <div className="text-xs text-slate-400">
+                                      <div className="text-xs text-muted-ink">
                                         Nhóm sinh hoạt riêng dành cho thành viên Tổ {searchedResult.group}
                                       </div>
                                     </div>
@@ -468,7 +468,7 @@ export default function TraCuuTrungTuyenPage() {
                                       <button
                                         type="button"
                                         onClick={() => handleCopy(groupUrl, 'to')}
-                                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs transition"
+                                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-muted-ink font-semibold rounded-lg text-xs transition"
                                       >
                                         {copiedKey === 'to' ? 'Đã copy' : 'Copy'}
                                       </button>
@@ -503,8 +503,8 @@ export default function TraCuuTrungTuyenPage() {
                                 />
                               </div>
                               <div className="space-y-0.5">
-                                <p className="text-sm font-bold text-slate-800">Mã QR Định Danh</p>
-                                <p className="text-[11px] text-slate-500 max-w-[190px] leading-tight mx-auto">
+                                <p className="text-sm font-bold text-ink">Mã QR Định Danh</p>
+                                <p className="text-[11px] text-muted-ink max-w-[190px] leading-tight mx-auto">
                                   Lưu lại mã này để điểm danh khi tham gia các hoạt động của Đội
                                 </p>
                               </div>
@@ -537,18 +537,18 @@ export default function TraCuuTrungTuyenPage() {
                         </svg>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-ink">
                           Kết quả tuyển thành viên
                         </span>
-                        <h3 className="text-xl font-extrabold text-slate-900">
+                        <h3 className="text-xl font-extrabold text-ink">
                           Cảm ơn {searchedResult.fullName} đã quan tâm đến Đội!
                         </h3>
                       </div>
-                      <p className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
+                      <p className="text-sm text-muted-ink max-w-lg mx-auto leading-relaxed">
                         Rất tiếc trong đợt tuyển quân lần này, Đội chưa thể đồng hành cùng bạn. Sự nhiệt huyết của bạn là điều Đội rất trân trọng, hẹn gặp lại bạn ở các chương trình tình nguyện mở rộng và đợt tuyển tiếp theo nhé!
                       </p>
                       {searchedResult.note && (
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 max-w-md mx-auto">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-muted-ink max-w-md mx-auto">
                           <strong>Lời nhắn:</strong> {searchedResult.note}
                         </div>
                       )}
@@ -560,10 +560,10 @@ export default function TraCuuTrungTuyenPage() {
                     <div className="w-11 h-11 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
                       !
                     </div>
-                    <h3 className="font-bold text-slate-900 text-base">
+                    <h3 className="font-bold text-ink text-base">
                       Không Tìm Thấy Thông Tin Trúng Tuyển
                     </h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-muted-ink leading-relaxed">
                       Hệ thống không ghi nhận kết quả trúng tuyển cho mã số <strong>&quot;{searchKeyword}&quot;</strong>. Vui lòng kiểm tra lại chính xác MSSV hoặc liên hệ Fanpage Đội Thanh niên Tình nguyện QNU nếu có sai sót.
                     </p>
                   </div>

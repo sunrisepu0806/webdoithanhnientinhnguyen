@@ -276,7 +276,7 @@ export default function DanhSachHoatDongPage() {
           
           {/* Tiêu đề chính */}
           <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-[42px] font-black text-[#0284c7] tracking-tight uppercase">
+            <h1 className="text-3xl sm:text-4xl md:text-[42px] font-black text-brand-ink tracking-tight uppercase">
               HOẠT ĐỘNG CỦA ĐỘI
             </h1>
           </div>
@@ -320,23 +320,23 @@ export default function DanhSachHoatDongPage() {
                   {/* Nội dung Card (ĐÃ BỎ TRÁI TIM) */}
                   <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2.5">
-                      <h3 className="text-base font-extrabold text-slate-900 leading-snug group-hover:text-[#0284c7] transition-colors line-clamp-2">
+                      <h3 className="text-base font-extrabold text-ink leading-snug group-hover:text-brand-ink transition-colors line-clamp-2">
                         {item.tieuDe}
                       </h3>
-                      <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                      <p className="text-xs text-muted-ink line-clamp-3 leading-relaxed">
                         {item.moTaNgan}
                       </p>
                     </div>
 
                     {/* Footer Card */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-muted-ink font-medium">
                       <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-[#0284c7]" /> {item.ngayDang}
+                        <Calendar size={13} className="text-brand-ink" /> {item.ngayDang}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Eye size={13} className="text-[#0284c7]" /> {item.luotXem} lượt xem
+                        <Eye size={13} className="text-brand-ink" /> {item.luotXem} lượt xem
                       </span>
-                      <span className="text-[#0284c7] font-bold group-hover:underline">
+                      <span className="text-brand-ink font-bold group-hover:underline">
                         Xem chi tiết &rarr;
                       </span>
                     </div>
@@ -345,8 +345,8 @@ export default function DanhSachHoatDongPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 text-slate-400 font-semibold space-y-2">
-              <p className="text-base font-bold text-slate-600">Chưa có bài viết hoạt động nào</p>
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 text-muted-ink font-semibold space-y-2">
+              <p className="text-base font-bold text-muted-ink">Chưa có bài viết hoạt động nào</p>
               <p className="text-xs">AHIHI CHƯA CÓ BÀI VIẾT NÀO CẢ......</p>
             </div>
           )}

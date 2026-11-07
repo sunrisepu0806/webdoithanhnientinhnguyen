@@ -211,29 +211,29 @@ export default function DangKyPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f3f9fe] font-sans text-slate-800 py-10 md:py-14 select-none">
+    <div className="w-full min-h-screen bg-[#f3f9fe] font-sans text-ink py-10 md:py-14 select-none">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10">
         
         {/* KHỐI CHỌN HOẠT ĐỘNG */}
         <div className="space-y-4 mb-10">
           <div className="text-center space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-brand-ink uppercase tracking-tight">
               Chọn Hoạt Động Tham Gia
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-muted-ink font-medium">
               Nhấp chọn một hoạt động bên dưới để mở form đăng ký
             </p>
             <div className="w-12 h-1 bg-[#0284c7] mx-auto rounded-full mt-2" />
           </div>
 
           {loadingHoatDong ? (
-            <div className="py-16 text-center text-xs font-bold text-slate-400">
+            <div className="py-16 text-center text-xs font-bold text-muted-ink">
               Đang tải danh sách hoạt động...
             </div>
           ) : hoatDongList.length === 0 ? (
             <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 max-w-xl mx-auto space-y-2 mt-6 shadow-xs">
-              <p className="text-sm font-bold text-slate-700">Hiện chưa có hoạt động nào mở đơn đăng ký</p>
-              <p className="text-xs text-slate-400">Vui lòng quay lại sau khi Ban cán sự mở đợt đăng ký mới.</p>
+              <p className="text-sm font-bold text-body-ink">Hiện chưa có hoạt động nào mở đơn đăng ký</p>
+              <p className="text-xs text-muted-ink">Vui lòng quay lại sau khi Ban cán sự mở đợt đăng ký mới.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
@@ -273,17 +273,17 @@ export default function DangKyPage() {
 
                     <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                       <div className="space-y-1.5">
-                        <h3 className="font-bold text-sm text-slate-900 leading-snug group-hover:text-[#0284c7] transition-colors">
+                        <h3 className="font-bold text-sm text-ink leading-snug group-hover:text-brand-ink transition-colors">
                           {item.tieuDe}
                         </h3>
-                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-muted-ink line-clamp-2 leading-relaxed">
                           {item.moTa}
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400">
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-muted-ink">
                         <span>Thời gian: {item.ngayDang}</span>
-                        <span className="text-[#0284c7] font-bold">Chi tiết →</span>
+                        <span className="text-brand-ink font-bold">Chi tiết →</span>
                       </div>
                     </div>
                   </div>
@@ -301,8 +301,8 @@ export default function DangKyPage() {
                 <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
                   ✓
                 </div>
-                <h3 className="text-xl font-black text-slate-900 uppercase">Đăng Ký Thành Công!</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <h3 className="text-xl font-black text-ink uppercase">Đăng Ký Thành Công!</h3>
+                <p className="text-xs text-muted-ink leading-relaxed">
                   Đơn đăng ký tham gia <strong>{currentSelectedHoatDong?.tieuDe}</strong> của bạn đã được lưu thành công.
                 </p>
                 <button
@@ -319,13 +319,13 @@ export default function DangKyPage() {
                 {/* Banner hoạt động */}
                 <div className="p-4 bg-sky-50 border border-sky-100 rounded-2xl flex items-center justify-between">
                   <div className="text-xs">
-                    <span className="text-slate-500 font-medium">Hoạt động đang chọn:</span>
-                    <p className="text-sm font-black text-[#0284c7]">{currentSelectedHoatDong?.tieuDe}</p>
+                    <span className="text-muted-ink font-medium">Hoạt động đang chọn:</span>
+                    <p className="text-sm font-black text-brand-ink">{currentSelectedHoatDong?.tieuDe}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedHoatDong(null)}
-                    className="text-xs text-slate-400 hover:text-rose-600 font-bold transition cursor-pointer"
+                    className="text-xs text-muted-ink hover:text-rose-600 font-bold transition cursor-pointer"
                   >
                     Đổi hoạt động ✕
                   </button>
@@ -334,7 +334,7 @@ export default function DangKyPage() {
                 {/* MỤC 1: THÔNG TIN CÁ NHÂN */}
                 <div className="bg-white p-6 md:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                    <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    <h2 className="text-xs font-black uppercase tracking-wider text-ink">
                       1. Thông Tin Thành Viên
                     </h2>
                     {isExistingMember ? (
@@ -351,11 +351,11 @@ export default function DangKyPage() {
                   <div className="space-y-3.5 text-xs">
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <label className="font-bold text-slate-700 uppercase text-[11px]">
+                        <label className="font-bold text-body-ink uppercase text-[11px]">
                           Mã Số Sinh Viên (MSSV) *
                         </label>
                         {autoFilling && (
-                          <span className="text-[11px] font-medium text-[#0284c7] animate-pulse">
+                          <span className="text-[11px] font-medium text-brand-ink animate-pulse">
                             Đang kiểm tra hồ sơ hệ thống...
                           </span>
                         )}
@@ -381,7 +381,7 @@ export default function DangKyPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Họ và Tên *
                         </label>
                         <input
@@ -391,7 +391,7 @@ export default function DangKyPage() {
                           placeholder="Họ và tên sinh viên"
                           className={`w-full p-2.5 border rounded-xl font-bold text-xs outline-none transition ${
                             isExistingMember
-                              ? 'bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed'
+                              ? 'bg-slate-100 text-body-ink border-slate-200 cursor-not-allowed'
                               : 'bg-slate-50 focus:bg-white focus:border-[#0284c7] border-slate-200'
                           }`}
                           value={formData.hoVaTen}
@@ -399,7 +399,7 @@ export default function DangKyPage() {
                         />
                       </div>
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Ngành / Lớp Học *
                         </label>
                         <input
@@ -409,7 +409,7 @@ export default function DangKyPage() {
                           placeholder="VD: Kỹ Thuật Phần Mềm K48"
                           className={`w-full p-2.5 border rounded-xl font-bold text-xs outline-none transition ${
                             isExistingMember
-                              ? 'bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed'
+                              ? 'bg-slate-100 text-body-ink border-slate-200 cursor-not-allowed'
                               : 'bg-slate-50 focus:bg-white focus:border-[#0284c7] border-slate-200'
                           }`}
                           value={formData.nganhHoc}
@@ -420,7 +420,7 @@ export default function DangKyPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Ngày Sinh *
                         </label>
                         <input
@@ -430,7 +430,7 @@ export default function DangKyPage() {
                           placeholder="VD: 31/10/07"
                           className={`w-full p-2.5 border rounded-xl font-mono text-xs outline-none transition ${
                             isExistingMember
-                              ? 'bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed font-bold'
+                              ? 'bg-slate-100 text-body-ink border-slate-200 cursor-not-allowed font-bold'
                               : 'bg-slate-50 focus:bg-white focus:border-[#0284c7] border-slate-200'
                           }`}
                           value={formData.ngaySinh}
@@ -438,14 +438,14 @@ export default function DangKyPage() {
                         />
                       </div>
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Giới Tính
                         </label>
                         <select
                           disabled={isExistingMember}
                           className={`w-full p-2.5 border rounded-xl font-medium text-xs outline-none transition ${
                             isExistingMember
-                              ? 'bg-slate-100 text-slate-700 border-slate-200 cursor-not-allowed font-bold'
+                              ? 'bg-slate-100 text-body-ink border-slate-200 cursor-not-allowed font-bold'
                               : 'bg-slate-50 focus:bg-white focus:border-[#0284c7] border-slate-200 cursor-pointer'
                           }`}
                           value={formData.gioiTinh}
@@ -462,7 +462,7 @@ export default function DangKyPage() {
                 {/* MỤC 2: CƠ CẤU BAN & ĐƠN VỊ TỔ */}
                 <div className="bg-white p-6 md:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-4">
                   <div className="border-b border-slate-100 pb-2.5">
-                    <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    <h2 className="text-xs font-black uppercase tracking-wider text-ink">
                       2. Đơn Vị & Ban Chuyên Môn
                     </h2>
                   </div>
@@ -471,19 +471,19 @@ export default function DangKyPage() {
                     {/* BẢNG THÔNG TIN TỔ VÀ BAN */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                        <span className="text-[10px] font-bold text-muted-ink uppercase block">
                           Tổ Sinh Hoạt:
                         </span>
-                        <p className="text-sm font-black text-slate-900 mt-0.5">
+                        <p className="text-sm font-black text-ink mt-0.5">
                           {formData.toHienTai}
                         </p>
                       </div>
 
                       <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                        <span className="text-[10px] font-bold text-muted-ink uppercase block">
                           Ban Chuyên Môn:
                         </span>
-                        <p className="text-sm font-black text-slate-900 mt-0.5">
+                        <p className="text-sm font-black text-ink mt-0.5">
                           {formData.banHienTai}
                         </p>
                       </div>
@@ -492,7 +492,7 @@ export default function DangKyPage() {
                     {/* NẾU BAN LÀ KHÔNG THÌ CHỌN NGUYỆN VỌNG */}
                     {formData.banHienTai === 'Không' && (
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Nguyện Vọng Vào Ban Chuyên Môn *
                         </label>
                         <select
@@ -508,7 +508,7 @@ export default function DangKyPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Số Điện Thoại Liên Hệ *
                         </label>
                         <input
@@ -521,7 +521,7 @@ export default function DangKyPage() {
                         />
                       </div>
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                        <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                           Email
                         </label>
                         <input
@@ -535,7 +535,7 @@ export default function DangKyPage() {
                     </div>
 
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1 uppercase text-[11px]">
+                      <label className="block font-bold text-body-ink mb-1 uppercase text-[11px]">
                         Ghi Chú / Đề Xuất Ca Hoạt Động
                       </label>
                       <textarea

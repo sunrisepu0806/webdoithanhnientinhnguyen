@@ -530,8 +530,8 @@ export default function FormDangKyChiTietPage() {
     return (
       <div className="min-h-screen bg-[#f8fbfe] flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-[#0284c7] animate-spin" />
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Đang tải biểu mẫu đăng ký...</p>
+          <Loader2 className="w-8 h-8 text-brand-ink animate-spin" />
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-ink">Đang tải biểu mẫu đăng ký...</p>
         </div>
       </div>
     );
@@ -540,7 +540,7 @@ export default function FormDangKyChiTietPage() {
   if (!activity) {
     return (
       <div className="min-h-screen bg-[#f8fbfe] flex flex-col items-center justify-center font-sans space-y-4 p-6">
-        <h2 className="text-xl font-black text-slate-800">Không tìm thấy hoạt động!</h2>
+        <h2 className="text-xl font-black text-ink">Không tìm thấy hoạt động!</h2>
         <Link href="/dang-ky" className="px-5 py-2.5 bg-[#0284c7] text-white font-bold rounded-xl text-xs uppercase">
           Quay lại danh sách
         </Link>
@@ -549,7 +549,7 @@ export default function FormDangKyChiTietPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f3f7fd] via-[#f7fafd] to-white font-sans text-slate-800 select-none flex flex-col justify-between overflow-x-hidden" suppressHydrationWarning>
+    <div className="min-h-screen bg-gradient-to-b from-[#f3f7fd] via-[#f7fafd] to-white font-sans text-ink select-none flex flex-col justify-between overflow-x-hidden" suppressHydrationWarning>
       
       <div ref={containerRef} onMouseMove={handleMouseMove} className="flex-1 flex flex-col justify-between relative overflow-hidden">
         
@@ -572,7 +572,7 @@ export default function FormDangKyChiTietPage() {
           <div>
             <Link
               href="/dang-ky"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0284c7] transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-ink hover:text-brand-ink transition cursor-pointer"
             >
               <ArrowLeft size={14} /> Chọn hoạt động khác
             </Link>
@@ -591,28 +591,28 @@ export default function FormDangKyChiTietPage() {
             )}
 
             <div className="p-6 sm:p-8 space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-brand-ink uppercase leading-tight">
                 {activity.tieuDe}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 font-semibold border-b border-slate-100 pb-4">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-ink font-semibold border-b border-slate-100 pb-4">
                 {activity.ngayDang && (
                   <span className="flex items-center gap-1.5">
-                    <Calendar size={14} className="text-[#0284c7]" /> {activity.ngayDang}
+                    <Calendar size={14} className="text-brand-ink" /> {activity.ngayDang}
                   </span>
                 )}
                 <span className="flex items-center gap-1.5">
-                  <Users size={14} className="text-[#0284c7]" /> 
+                  <Users size={14} className="text-brand-ink" /> 
                   {activity.maxParticipants > 0 ? (
-                    <span>Chỉ tiêu: <strong className="text-slate-900">{currentRegisteredCount}/{activity.maxParticipants}</strong> người</span>
+                    <span>Chỉ tiêu: <strong className="text-ink">{currentRegisteredCount}/{activity.maxParticipants}</strong> người</span>
                   ) : (
-                    <span>Đã đăng ký: <strong className="text-slate-900">{currentRegisteredCount}</strong> người</span>
+                    <span>Đã đăng ký: <strong className="text-ink">{currentRegisteredCount}</strong> người</span>
                   )}
                 </span>
               </div>
 
               {activity.moTaNgan && (
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line pt-1">
+                <p className="text-xs sm:text-sm text-muted-ink leading-relaxed whitespace-pre-line pt-1">
                   {activity.moTaNgan}
                 </p>
               )}
@@ -626,10 +626,10 @@ export default function FormDangKyChiTietPage() {
                 <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
                   <CheckCircle2 size={38} />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
+                <h2 className="text-2xl sm:text-3xl font-black text-ink uppercase">
                   ĐĂNG KÝ THÀNH CÔNG!
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm text-muted-ink max-w-md mx-auto leading-relaxed">
                   Cảm ơn <strong>{fullName}</strong> ({mssv}) đã đăng ký tham gia hoạt động <strong>{activity.tieuDe}</strong>.
                 </p>
               </div>
@@ -646,10 +646,10 @@ export default function FormDangKyChiTietPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-900 flex items-center justify-center gap-1.5">
-                    <QrCode size={14} className="text-[#0284c7]" /> Mã QR Điểm Danh Cá Nhân
+                  <p className="text-xs font-bold text-ink flex items-center justify-center gap-1.5">
+                    <QrCode size={14} className="text-brand-ink" /> Mã QR Điểm Danh Cá Nhân
                   </p>
-                  <p className="text-[11px] text-slate-500">Hãy lưu mã này vào điện thoại để điểm danh khi tham gia sự kiện</p>
+                  <p className="text-[11px] text-muted-ink">Hãy lưu mã này vào điện thoại để điểm danh khi tham gia sự kiện</p>
                 </div>
 
                 <button
@@ -677,7 +677,7 @@ export default function FormDangKyChiTietPage() {
               <div className="pt-2">
                 <Link
                   href="/dang-ky"
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600 transition"
+                  className="text-xs font-bold text-muted-ink hover:text-muted-ink transition"
                 >
                   &larr; Quay lại danh sách hoạt động
                 </Link>
@@ -686,17 +686,17 @@ export default function FormDangKyChiTietPage() {
           ) : isClosed ? (
             <div className="bg-white rounded-[32px] p-8 text-center space-y-3 border border-rose-200 shadow-md">
               <AlertCircle size={40} className="text-rose-500 mx-auto" />
-              <h3 className="text-lg font-black text-slate-900 uppercase">
+              <h3 className="text-lg font-black text-ink uppercase">
                 {isFull ? 'Hoạt động đã đủ số lượng đăng ký!' : 'Hoạt động đã đóng đăng ký!'}
               </h3>
-              <p className="text-xs text-slate-500">Cảm ơn bạn đã quan tâm. Vui lòng theo dõi và đăng ký các hoạt động tiếp theo của Đội.</p>
+              <p className="text-xs text-muted-ink">Cảm ơn bạn đã quan tâm. Vui lòng theo dõi và đăng ký các hoạt động tiếp theo của Đội.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md rounded-[32px] p-6 sm:p-8 border border-slate-200/80 shadow-xl space-y-6">
               
               <div className="space-y-4">
                 <div className="border-b border-slate-100 pb-3">
-                  <h3 className="font-black text-slate-900 text-sm uppercase">
+                  <h3 className="font-black text-ink text-sm uppercase">
                     THÔNG TIN SINH VIÊN
                   </h3>
                 </div>
@@ -709,7 +709,7 @@ export default function FormDangKyChiTietPage() {
 
                 {/* Ô nhập MSSV */}
                 <div>
-                  <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                  <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                     Mã Số Sinh Viên (MSSV) <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -723,16 +723,16 @@ export default function FormDangKyChiTietPage() {
                       onBlur={(e) => autoFetchMemberInfo(e.target.value)}
                     />
                     {isFetchingInfo && (
-                      <Loader2 size={14} className="absolute right-3 top-3 animate-spin text-[#0284c7]" />
+                      <Loader2 size={14} className="absolute right-3 top-3 animate-spin text-brand-ink" />
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Nhập mã số sinh viên để hệ thống tự động kiểm tra và điền thông tin.</p>
+                  <p className="text-[11px] text-muted-ink mt-1">Nhập mã số sinh viên để hệ thống tự động kiểm tra và điền thông tin.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Họ và Tên */}
                   <div className="sm:col-span-3">
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                    <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                       Họ và Tên <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -742,8 +742,8 @@ export default function FormDangKyChiTietPage() {
                       placeholder="VD: Nguyễn Văn A"
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
-                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none tracking-wide' 
-                          : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
+                          ? 'bg-slate-100 text-muted-ink cursor-not-allowed select-none tracking-wide' 
+                          : 'bg-slate-50 text-ink focus:bg-white focus:border-[#0284c7]'
                       }`}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -752,7 +752,7 @@ export default function FormDangKyChiTietPage() {
 
                   {/* Ô Ngành Học có tìm kiếm gợi ý */}
                   <div className="sm:col-span-2">
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                    <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                       Ngành Học <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -762,8 +762,8 @@ export default function FormDangKyChiTietPage() {
                       placeholder="Gõ để tìm ngành (VD: Kỹ thuật phần mềm)..."
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
-                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
-                          : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
+                          ? 'bg-slate-100 text-muted-ink cursor-not-allowed select-none' 
+                          : 'bg-slate-50 text-ink focus:bg-white focus:border-[#0284c7]'
                       }`}
                       value={selectedMajor}
                       onChange={(e) => setSelectedMajor(e.target.value)}
@@ -777,11 +777,11 @@ export default function FormDangKyChiTietPage() {
 
                   {/* Ô Khóa: Tiền tố K cố định, khóa không cho sửa nếu là thành viên đã đăng ký */}
                   <div>
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                    <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                       Khóa <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative flex items-center">
-                      <span className="absolute left-3.5 text-xs font-black text-slate-500 select-none pointer-events-none">
+                      <span className="absolute left-3.5 text-xs font-black text-muted-ink select-none pointer-events-none">
                         K
                       </span>
                       <input
@@ -794,8 +794,8 @@ export default function FormDangKyChiTietPage() {
                         placeholder="48"
                         className={`w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold font-mono focus:outline-none tracking-widest ${
                           isMemberExists 
-                            ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none' 
-                            : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
+                            ? 'bg-slate-100 text-muted-ink cursor-not-allowed select-none' 
+                            : 'bg-slate-50 text-ink focus:bg-white focus:border-[#0284c7]'
                         }`}
                         value={cohortNumber}
                         onChange={(e) => {
@@ -809,20 +809,20 @@ export default function FormDangKyChiTietPage() {
 
                   {/* Đơn vị (Tổ / TNV) */}
                   <div className="sm:col-span-1">
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                    <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                       Đơn vị (Tổ)
                     </label>
                     <input
                       type="text"
                       readOnly
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-muted-ink cursor-not-allowed select-none focus:outline-none"
                       value={group || 'TNV'}
                     />
                   </div>
 
                   {/* Ngày Sinh */}
                   <div className="sm:col-span-2">
-                    <label className="block font-bold text-slate-700 text-xs mb-1 uppercase tracking-wider">
+                    <label className="block font-bold text-body-ink text-xs mb-1 uppercase tracking-wider">
                       Ngày Sinh (Không bắt buộc)
                     </label>
                     <input
@@ -831,8 +831,8 @@ export default function FormDangKyChiTietPage() {
                       placeholder="VD: 31/10/2006"
                       className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none ${
                         isMemberExists 
-                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed select-none font-mono' 
-                          : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-[#0284c7]'
+                          ? 'bg-slate-100 text-muted-ink cursor-not-allowed select-none font-mono' 
+                          : 'bg-slate-50 text-ink focus:bg-white focus:border-[#0284c7]'
                       }`}
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
@@ -844,13 +844,13 @@ export default function FormDangKyChiTietPage() {
               {/* Câu hỏi khảo sát */}
               {activity.questions && activity.questions.length > 0 && (
                 <div className="space-y-4 pt-4 border-t border-slate-100">
-                  <h3 className="text-sm font-black uppercase text-slate-900 border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-black uppercase text-ink border-b border-slate-100 pb-2">
                     Câu hỏi khảo sát từ Ban Tổ Chức
                   </h3>
 
                   {activity.questions.map((q: FormQuestion, qIndex: number) => (
                     <div key={q.id || `q_view_${qIndex}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                      <label className="block text-xs font-extrabold text-slate-800">
+                      <label className="block text-xs font-extrabold text-ink">
                         {q.title} {q.required && <span className="text-rose-500">*</span>}
                       </label>
 
@@ -879,14 +879,14 @@ export default function FormDangKyChiTietPage() {
                       {q.type === 'radio' && q.options && (
                         <div className="space-y-1.5 pt-1">
                           {q.options.map((opt, optIdx) => (
-                            <label key={optIdx} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                            <label key={optIdx} className="flex items-center gap-2 text-xs text-body-ink cursor-pointer">
                               <input
                                 type="radio"
                                 name={`question_${q.id}`}
                                 required={q.required}
                                 checked={answers[q.id] === opt}
                                 onChange={() => setAnswers({ ...answers, [q.id]: opt })}
-                                className="text-[#0284c7] focus:ring-sky-500"
+                                className="text-brand-ink focus:ring-sky-500"
                               />
                               <span>{opt}</span>
                             </label>
@@ -897,12 +897,12 @@ export default function FormDangKyChiTietPage() {
                       {q.type === 'checkbox' && q.options && (
                         <div className="space-y-1.5 pt-1">
                           {q.options.map((opt, optIdx) => (
-                            <label key={optIdx} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                            <label key={optIdx} className="flex items-center gap-2 text-xs text-body-ink cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={(answers[q.id] || []).includes(opt)}
                                 onChange={() => handleCheckboxChange(q.id, opt, q.maxSelect)}
-                                className="rounded text-[#0284c7] focus:ring-sky-500"
+                                className="rounded text-brand-ink focus:ring-sky-500"
                               />
                               <span>{opt}</span>
                             </label>

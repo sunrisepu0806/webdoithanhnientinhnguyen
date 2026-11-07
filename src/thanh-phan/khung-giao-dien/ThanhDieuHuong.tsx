@@ -6,11 +6,9 @@ import { usePathname } from 'next/navigation';
 
 const navLinks = [
   { name: 'Trang chủ', href: '/' },
+  { name: 'Tra cứu', href: '/tracuu' },
+  { name: 'BXH tháng', href: '/bang-xep-hang' },
   { name: 'Giới thiệu', href: '/gioi-thieu' },
-  { name: 'Nhật ký', href: '/nhat-ky' },
-  { name: 'Hoạt động', href: '/hoat-dong' },
-  { name: 'Thành tích', href: '/thanh-tich' },
-  { name: 'Shop TNTN QNU', href: '/shop' },
 ];
 
 export default function ThanhDieuHuong() {
@@ -65,18 +63,18 @@ export default function ThanhDieuHuong() {
         
         {/* LOGO VỚI HIỆU ỨNG TƯƠNG TÁC */}
         <Link href="/" className="flex items-center gap-3 group z-50">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0 overflow-hidden rounded-full bg-white shadow-sm">
             <img
               src="/logo.png"
               alt="Logo Đội TNTN QNU"
-              className="w-full h-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-3deg]"
+              className="w-full h-full object-contain rounded-full transition-transform duration-300 group-hover:rotate-[-3deg]"
             />
           </div>
           <div className="leading-tight">
-            <span className="block text-[10px] sm:text-[11px] font-bold text-slate-800 tracking-wider uppercase group-hover:text-slate-900 transition-colors">
+            <span className="block text-[10px] sm:text-[11px] font-bold text-ink tracking-wider uppercase group-hover:text-ink transition-colors">
               ĐỘI THANH NIÊN TÌNH NGUYỆN QNU
             </span>
-            <span className="block text-sm sm:text-base font-black text-[#0284c7] group-hover:text-[#0369a1] transition-colors">
+            <span className="block text-sm sm:text-base font-black text-brand-ink group-hover:text-brand-strong transition-colors">
               ĐẠI HỌC QUY NHƠN
             </span>
           </div>
@@ -92,8 +90,8 @@ export default function ThanhDieuHuong() {
                 href={link.href}
                 className={`relative px-4 py-2 rounded-full text-sm font-bold tracking-tight transition-all duration-200 flex items-center gap-1.5 ${
                   isActive
-                    ? 'text-[#0284c7] bg-sky-50 shadow-sm shadow-sky-100'
-                    : 'text-slate-600 hover:text-[#0284c7] hover:bg-sky-50/50'
+                    ? 'text-brand-ink bg-sky-50 shadow-sm shadow-sky-100'
+                    : 'text-muted-ink hover:text-brand-ink hover:bg-sky-50/50'
                 }`}
               >
                 {isActive && (
@@ -121,7 +119,7 @@ export default function ThanhDieuHuong() {
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Mở menu điều hướng"
-            className="lg:hidden p-2.5 rounded-2xl text-slate-700 hover:text-[#0284c7] hover:bg-white border border-slate-200/80 focus:outline-none transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
+            className="lg:hidden p-2.5 rounded-2xl text-body-ink hover:text-brand-ink hover:bg-white border border-slate-200/80 focus:outline-none transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
           >
             <div className="w-5 h-4 flex flex-col justify-between items-center relative">
               <span
@@ -178,8 +176,8 @@ export default function ThanhDieuHuong() {
                   }}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-base font-bold transition-all duration-300 ${
                     isActive
-                      ? 'bg-sky-50 text-[#0284c7] border border-sky-100 shadow-sm'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-[#0284c7]'
+                      ? 'bg-sky-50 text-brand-ink border border-sky-100 shadow-sm'
+                      : 'text-body-ink hover:bg-slate-50 hover:text-brand-ink'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -189,7 +187,7 @@ export default function ThanhDieuHuong() {
                     {link.name}
                   </span>
                   <svg
-                    className="w-4 h-4 text-slate-400"
+                    className="w-4 h-4 text-muted-ink"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -207,7 +205,7 @@ export default function ThanhDieuHuong() {
           </nav>
 
           <div className="pt-6 border-t border-slate-100 text-center space-y-2">
-            <p className="text-xs font-semibold text-slate-600">
+            <p className="text-xs font-semibold text-muted-ink">
               Trường Đại học Quy Nhơn
             </p>
           </div>

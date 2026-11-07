@@ -278,7 +278,7 @@ export default function DanhSachDangKyPage() {
           <div>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#0284c7] transition bg-white/70 backdrop-blur-xs px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-ink hover:text-brand-ink transition bg-white/70 backdrop-blur-xs px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-xs"
             >
               <ArrowLeft size={13} /> Về Trang Chủ
             </Link>
@@ -286,11 +286,11 @@ export default function DanhSachDangKyPage() {
 
           {/* TIÊU ĐỀ THEO PHONG CÁCH BÀI VIẾT (TƯƠNG ĐỒNG ẢNH MẪU) */}
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-[34px] font-extrabold text-[#0284c7] tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-[34px] font-extrabold text-brand-ink tracking-tight leading-tight">
               Đăng Ký Tham Gia Hoạt Động
             </h1>
-            <p className="text-xs sm:text-[13px] text-slate-500 italic font-normal leading-relaxed">
-              Danh sách các hoạt động thiện nguyện, chiến dịch và chương trình đang mở đăng ký của <strong className="font-semibold not-italic text-slate-700">Đội TNTN QNU</strong>.
+            <p className="text-xs sm:text-[13px] text-muted-ink italic font-normal leading-relaxed">
+              Danh sách các hoạt động thiện nguyện, chiến dịch và chương trình đang mở đăng ký của <strong className="font-semibold not-italic text-body-ink">Đội TNTN QNU</strong>.
             </p>
           </div>
 
@@ -364,38 +364,38 @@ export default function DanhSachDangKyPage() {
 
                     {/* KHỐI THÔNG TIN VĂN BẢN (TYPOGRAPHY THEO MẪU) */}
                     <div className="flex-1 min-w-0 space-y-2.5 text-left w-full">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#0284c7] block">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-brand-ink block">
                         ĐĂNG KÝ CHƯƠNG TRÌNH
                       </span>
 
-                      <h2 className="text-lg sm:text-xl font-bold text-[#0284c7] leading-snug tracking-tight group-hover:text-[#0369a1] transition-colors">
+                      <h2 className="text-lg sm:text-xl font-bold text-brand-ink leading-snug tracking-tight group-hover:text-brand-strong transition-colors">
                         {item.tieuDe}
                       </h2>
 
                       {/* Đoạn mô tả với font chữ nghiêng và màu xám thanh lịch */}
-                      <p className="text-xs sm:text-[13px] text-slate-600 italic leading-relaxed font-normal">
+                      <p className="text-xs sm:text-[13px] text-muted-ink italic leading-relaxed font-normal">
                         {item.moTaNgan || (
                           <>
-                            Chào mừng bạn tham gia hoạt động cùng <strong className="font-semibold not-italic text-slate-800">Đội Thanh niên Tình nguyện QNU</strong>, nơi gắn kết và lưu giữ những kỷ niệm nhiệt huyết của tuổi trẻ.
+                            Chào mừng bạn tham gia hoạt động cùng <strong className="font-semibold not-italic text-ink">Đội Thanh niên Tình nguyện QNU</strong>, nơi gắn kết và lưu giữ những kỷ niệm nhiệt huyết của tuổi trẻ.
                           </>
                         )}
                       </p>
 
                       {/* Hàng thông số ngày tháng và số lượng đăng ký */}
-                      <div className="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs text-slate-500 pt-2 border-t border-slate-100/90 font-medium">
+                      <div className="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs text-muted-ink pt-2 border-t border-slate-100/90 font-medium">
                         {item.ngayDang && (
                           <div className="flex items-center gap-1.5">
-                            <Calendar size={13} className="text-[#0284c7]" />
+                            <Calendar size={13} className="text-brand-ink" />
                             <span>{item.ngayDang}</span>
                           </div>
                         )}
 
                         <div className="flex items-center gap-1.5">
-                          <Users size={13} className="text-[#0284c7]" />
+                          <Users size={13} className="text-brand-ink" />
                           <span>
                             {hasLimit ? (
                               <>
-                                <strong className={isFull ? 'text-rose-600' : 'text-slate-800'}>
+                                <strong className={isFull ? 'text-rose-600' : 'text-ink'}>
                                   {item.soNguoiDangKy}/{item.maxParticipants}
                                 </strong>{' '}
                                 đã đăng ký
@@ -407,9 +407,9 @@ export default function DanhSachDangKyPage() {
                         </div>
 
                         {formattedEndDate && (
-                          <div className="flex items-center gap-1.5 text-slate-600">
-                            <Clock size={13} className="text-[#0284c7]" />
-                            <span>Hạn chót: <strong className="text-slate-800">{formattedEndDate}</strong></span>
+                          <div className="flex items-center gap-1.5 text-muted-ink">
+                            <Clock size={13} className="text-brand-ink" />
+                            <span>Hạn chót: <strong className="text-ink">{formattedEndDate}</strong></span>
                           </div>
                         )}
                       </div>
@@ -418,7 +418,7 @@ export default function DanhSachDangKyPage() {
                     {/* NÚT THAO TÁC BÊN PHẢI */}
                     <div className="shrink-0 w-full md:w-auto pt-2 md:pt-0">
                       {isClosed ? (
-                        <div className="w-full md:w-auto px-6 py-3 rounded-full bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider text-center border border-slate-200/80 cursor-not-allowed">
+                        <div className="w-full md:w-auto px-6 py-3 rounded-full bg-slate-100 text-muted-ink font-bold text-xs uppercase tracking-wider text-center border border-slate-200/80 cursor-not-allowed">
                           Đã đóng đăng ký
                         </div>
                       ) : (
@@ -436,8 +436,8 @@ export default function DanhSachDangKyPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white/80 rounded-[32px] border border-dashed border-slate-200 text-slate-400 font-medium space-y-1.5 max-w-md mx-auto">
-              <p className="text-sm font-bold text-slate-700">Chưa có hoạt động mở đăng ký</p>
+            <div className="text-center py-16 bg-white/80 rounded-[32px] border border-dashed border-slate-200 text-muted-ink font-medium space-y-1.5 max-w-md mx-auto">
+              <p className="text-sm font-bold text-body-ink">Chưa có hoạt động mở đăng ký</p>
               <p className="text-xs">Hiện tại danh sách biểu mẫu đang được cập nhật, vui lòng quay lại sau!</p>
             </div>
           )}

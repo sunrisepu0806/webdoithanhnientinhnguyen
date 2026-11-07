@@ -35,7 +35,7 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
   const isExternal = targetUrl.startsWith('http');
 
   return (
-    <div className="w-[270px] overflow-hidden rounded-2xl bg-white font-sans text-slate-800 shadow-xl">
+    <div className="w-[270px] overflow-hidden rounded-2xl bg-white font-sans text-ink shadow-xl">
       {items.length > 1 && (
         <div className="flex items-center justify-between bg-slate-900 px-3.5 py-2 text-xs font-bold text-white select-none">
           <span className="flex items-center gap-1.5 text-amber-400">
@@ -83,17 +83,17 @@ const GroupedPopupContent = ({ items }: { items: LocationItem[] }) => {
       </div>
 
       <div className="space-y-2 p-4">
-        <h4 className="m-0 text-sm font-black leading-snug tracking-tight text-slate-900 line-clamp-2">
+        <h4 className="m-0 text-sm font-black leading-snug tracking-tight text-ink line-clamp-2">
           {currentItem.ten}
         </h4>
 
         {currentItem.thoiGian && (
-          <p className="m-0 flex items-center gap-1 text-[11px] font-bold text-[#0284c7]">
+          <p className="m-0 flex items-center gap-1 text-[11px] font-bold text-brand-ink">
             <span>🗓️</span> {currentItem.thoiGian}
           </p>
         )}
 
-        <p className="m-0 text-xs leading-relaxed text-slate-600 line-clamp-2">
+        <p className="m-0 text-xs leading-relaxed text-muted-ink line-clamp-2">
           {currentItem.moTa}
         </p>
 
@@ -265,10 +265,10 @@ export default function NhatKyPage() {
         <div className="relative z-20 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10 pt-8 pb-12 flex-1 flex flex-col justify-center">
           {/* TIÊU ĐỀ SECTION */}
           <div className="mb-6 space-y-3 text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#0284c7]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-brand-ink">
               DẤU ẤN THANH XUÂN TÌNH NGUYỆN
             </h1>
-            <p className="mx-auto max-w-2xl text-xs sm:text-sm text-slate-600">
+            <p className="mx-auto max-w-2xl text-xs sm:text-sm text-muted-ink">
               Khám phá các điểm đến, chiến dịch tình nguyện và hành trình lan tỏa yêu thương của Đội TNTN QNU trên khắp mọi nẻo đường.
             </p>
           </div>

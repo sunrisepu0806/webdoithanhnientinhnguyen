@@ -7,11 +7,10 @@ import { MapPin, Mail, ChevronRight } from 'lucide-react';
 const quickLinks = [
   { name: 'Trang chủ', href: '/' },
   { name: 'Giới thiệu', href: '/gioi-thieu' },
-  { name: 'Hoạt động', href: '/hoat-dong' },
 ];
 
 const joinLinks = [
-  { name: 'Tra cứu ', href: '/tracuudiemdanh' },
+  { name: 'Tra cứu sinh viên', href: '/tracuu' },
 ];
 
 export default function ChanTrang() {
@@ -35,16 +34,16 @@ export default function ChanTrang() {
                 />
               </div>
               <div className="leading-tight">
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-300 group-hover:text-white transition-colors">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-inverse-muted group-hover:text-white transition-colors">
                   ĐỘI Thanh Niên Tình Nguyện QNU
                 </p>
-                <p className="text-base font-black text-white tracking-tight group-hover:text-blue-400 transition-colors">
+                <p className="text-base font-black text-white tracking-tight group-hover:text-inverse-link transition-colors">
                   ĐẠI HỌC QUY NHƠN
                 </p>
               </div>
             </Link>
 
-            <p className="text-xs text-slate-300 italic">
+            <p className="text-xs text-inverse-muted italic">
               Kết nối sức trẻ – Lan tỏa yêu thương
             </p>
 
@@ -69,16 +68,16 @@ export default function ChanTrang() {
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
               THÔNG TIN LIÊN HỆ
             </h3>
-            <div className="space-y-2.5 text-xs text-slate-300">
+            <div className="space-y-2.5 text-xs text-inverse-muted">
               <p className="flex items-start gap-2.5">
-                <MapPin size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <MapPin size={16} className="text-inverse-link shrink-0 mt-0.5" />
                 <span>Trường Đại học Quy Nhơn, 170 An Dương Vương, Quy Nhơn</span>
               </p>
               <p className="flex items-center gap-2.5">
-                <Mail size={16} className="text-blue-400 shrink-0" />
+                <Mail size={16} className="text-inverse-link shrink-0" />
                 <a
                   href="mailto:doithanhnientinhnguyenqnu23@gmail.com"
-                  className="hover:text-blue-300 transition-colors truncate"
+                  className="hover:text-inverse-link transition-colors truncate"
                 >
                   doitntnqnu2023@gmail.com
                 </a>
@@ -92,14 +91,14 @@ export default function ChanTrang() {
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
               LIÊN KẾT NHANH
             </h3>
-            <ul className="space-y-2 text-xs text-slate-300">
+            <ul className="space-y-2 text-xs text-inverse-muted">
               {quickLinks.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="hover:text-blue-400 hover:translate-x-1 transition-all flex items-center gap-1.5 group"
+                    className="hover:text-inverse-link hover:translate-x-1 transition-all flex items-center gap-1.5 group"
                   >
-                    <ChevronRight size={12} className="text-slate-400 group-hover:text-blue-400 transition-colors shrink-0" />
+                    <ChevronRight size={12} className="text-inverse-muted group-hover:text-inverse-link transition-colors shrink-0" />
                     <span>{item.name}</span>
                   </Link>
                 </li>
@@ -113,14 +112,14 @@ export default function ChanTrang() {
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
               THAM GIA ĐỘI
             </h3>
-            <ul className="space-y-2 text-xs text-slate-300">
+            <ul className="space-y-2 text-xs text-inverse-muted">
               {joinLinks.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="hover:text-blue-400 hover:translate-x-1 transition-all flex items-center gap-1.5 group"
+                    className="hover:text-inverse-link hover:translate-x-1 transition-all flex items-center gap-1.5 group"
                   >
-                    <ChevronRight size={12} className="text-slate-400 group-hover:text-blue-400 transition-colors shrink-0" />
+                    <ChevronRight size={12} className="text-inverse-muted group-hover:text-inverse-link transition-colors shrink-0" />
                     <span>{item.name}</span>
                   </Link>
                 </li>
@@ -131,7 +130,7 @@ export default function ChanTrang() {
         </div>
 
         {/* Bản quyền & Tác giả */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-inverse-muted">
           <p>© 2026 Đội Thanh Niên Tình Nguyện QNU. All rights reserved.</p>
           <p className="flex items-center gap-1">
             <span>Developed by</span>
@@ -139,7 +138,7 @@ export default function ChanTrang() {
               href="https://www.facebook.com/pupipupipupi08"
               target="_blank"
               rel="noreferrer"
-              className="text-slate-300 hover:text-blue-400 font-medium transition-colors underline-offset-2 hover:underline"
+              className="text-inverse-muted hover:text-inverse-link font-medium transition-colors underline-offset-2 hover:underline"
             >
               obi.phu08
             </a>

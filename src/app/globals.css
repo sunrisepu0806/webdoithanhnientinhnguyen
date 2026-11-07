@@ -1,16 +1,36 @@
 @import "tailwindcss";
+@import "@fontsource/be-vietnam-pro/400.css";
+@import "@fontsource/be-vietnam-pro/500.css";
+@import "@fontsource/be-vietnam-pro/600.css";
+@import "@fontsource/be-vietnam-pro/700.css";
+@import "@fontsource/be-vietnam-pro/800.css";
+@import "@fontsource/be-vietnam-pro/900.css";
+
+@theme {
+  --color-brand-ink: #036998;
+  --color-brand-strong: #075075;
+  --color-ink: #183247;
+  --color-body-ink: #344b60;
+  --color-muted-ink: #536879;
+  --color-inverse-muted: #c3d5e5;
+  --color-inverse-link: #9ddcff;
+  --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-mono: var(--font-sans);
+}
+
+body { font-family: var(--font-sans); }
 
 /* 1. KHÓA CHẶT CHẾ ĐỘ SÁNG TOÀN DIỆN */
 :root {
   color-scheme: light !important;
   --background: #f4f7fc;
-  --foreground: #0f172a;
+  --foreground: var(--color-body-ink);
 }
 
 html,
 body {
   background-color: #f4f7fc !important;
-  color: #0f172a !important;
+  color: var(--foreground);
   color-scheme: light !important;
   overflow-x: hidden;
   overflow-y: auto;
@@ -23,7 +43,7 @@ body {
   html,
   body {
     background-color: #f4f7fc !important;
-    color: #0f172a !important;
+    color: var(--foreground);
   }
 }
 

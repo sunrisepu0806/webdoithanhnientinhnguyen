@@ -239,21 +239,21 @@ export default function GioiThieuPage() {
           
           {/* CỘT TRÁI: TIÊU ĐỀ & VĂN BẢN GIỚI THIỆU */}
           <div className="lg:col-span-6 space-y-5 text-left">
-            <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] font-black text-[#0284c7] tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] font-black text-brand-ink tracking-tight leading-tight">
               Về Đội Tình Nguyện <br />
               <span>Thanh Niên QNU</span>
             </h1>
 
-            <div className="space-y-4 text-justify text-sm sm:text-base leading-relaxed text-slate-700">
+            <div className="space-y-4 text-justify text-sm sm:text-base leading-relaxed text-body-ink">
               <p>
                 Đội Thanh niên Tình nguyện QNU được thành lập vào ngày 27/04/2023 từ tiền thân là Đội Phản ứng nhanh Trường Đại học Quy Nhơn, là nơi quy tụ những bạn trẻ có chung nhiệt huyết, tinh thần trách nhiệm và mong muốn cống hiến hết mình cho cộng đồng.
               </p>
 
               <p>
-                Đội luôn là lực lượng nòng cốt tiên phong đồng hành cùng các chiến dịch lớn của Đoàn – Hội Sinh viên như: <em className="font-medium text-slate-900">Hội thao, Chủ nhật Xanh, Tiếp sức mùa thi, Honda Uni-Tour, Ngày hội Chào Tân sinh viên...</em> Bên cạnh đó, Đội tích cực tổ chức các chương trình thiện nguyện trao gửi hơi ấm nhân ái khắp tỉnh Bình Định.
+                Đội luôn là lực lượng nòng cốt tiên phong đồng hành cùng các chiến dịch lớn của Đoàn – Hội Sinh viên như: <em className="font-medium text-ink">Hội thao, Chủ nhật Xanh, Tiếp sức mùa thi, Honda Uni-Tour, Ngày hội Chào Tân sinh viên...</em> Bên cạnh đó, Đội tích cực tổ chức các chương trình thiện nguyện trao gửi hơi ấm nhân ái khắp tỉnh Bình Định.
               </p>
 
-              <p className="font-semibold leading-relaxed text-[#0284c7]">
+              <p className="font-semibold leading-relaxed text-brand-ink">
                 Với phương châm &ldquo;Kết nối sức trẻ - lan tỏa yêu thương&rdquo;, Đội TNTN QNU không ngừng xây dựng môi trường gắn kết, sẻ chia, nơi mỗi thành viên cùng học hỏi, trưởng thành và lưu giữ những ký ức thanh xuân rực rỡ nhất dưới mái trường Đại học Quy Nhơn.
               </p>
             </div>

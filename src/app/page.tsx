@@ -292,19 +292,19 @@ export default function TrangChu() {
           {/* Cột trái: Tiêu đề 1 hàng chuẩn, Slogan & Nút */}
           <div className="lg:col-span-5 space-y-4 sm:space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start">
             <div className="space-y-2 flex flex-col items-center lg:items-start w-full">
-              <h2 className="text-sm sm:text-base md:text-lg font-black text-slate-800 tracking-wider uppercase">
+              <h2 className="text-sm sm:text-base md:text-lg font-black text-ink tracking-wider uppercase">
                 ĐỘI THANH NIÊN TÌNH NGUYỆN QNU
               </h2>
               
               {/* CHỮ ĐẠI HỌC QUY NHƠN TRÊN 1 HÀNG DUY NHẤT CÂN ĐỐI */}
-              <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] xl:text-[48px] font-black text-[#0284c7] tracking-tight whitespace-nowrap leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-[42px] lg:text-[44px] xl:text-[48px] font-black text-brand-ink tracking-tight whitespace-nowrap leading-tight">
                 ĐẠI HỌC QUY NHƠN
               </h1>
             </div>
 
             {/* Slogan typewriter */}
             <div className="min-h-[48px] sm:min-h-[56px] flex items-center justify-center lg:justify-start">
-              <p className="text-sm sm:text-base md:text-lg font-semibold text-slate-600 leading-relaxed px-2 sm:px-0">
+              <p className="text-sm sm:text-base md:text-lg font-semibold text-muted-ink leading-relaxed px-2 sm:px-0">
                 {chuoiHienThi}
                 <span className="inline-block w-[2px] sm:w-[2.5px] h-4 sm:h-5 bg-[#0284c7] ml-1.5 translate-y-[2px] animate-pulse"></span>
               </p>
@@ -313,17 +313,17 @@ export default function TrangChu() {
             {/* Nút chuyển trang */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
               <Link
-                href="/hoat-dong"
+                href="/tracuu"
                 className="relative group overflow-hidden px-6 sm:px-8 py-3 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200 active:scale-95"
               >
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
-                <span className="relative z-10">Xem Hoạt Động</span>
+                <span className="relative z-10">Tra cứu sinh viên</span>
               </Link>
               <a
-                href="/tracuudiemdanh"
-                className="px-6 sm:px-8 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm shadow-sm hover:shadow border border-slate-200 hover:scale-105 transition-all duration-200 active:scale-95"
+                href="/ketquatrungtuyen"
+                className="px-6 sm:px-8 py-3 rounded-full bg-white hover:bg-slate-50 text-body-ink font-bold text-xs sm:text-sm shadow-sm hover:shadow border border-slate-200 hover:scale-105 transition-all duration-200 active:scale-95"
               >
-                Cấp Mã QR Điểm Danh
+                Kết quả trúng tuyển
               </a>
             </div>
           </div>
