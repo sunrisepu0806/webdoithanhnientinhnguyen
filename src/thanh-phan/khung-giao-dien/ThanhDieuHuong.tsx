@@ -11,9 +11,6 @@ const navLinks = [
   { name: 'Giới thiệu', href: '/gioi-thieu' },
 ];
 
-const registrationLink = { name: 'Đăng ký hoạt động', href: '/dang-ky' };
-const mobileLinks = [...navLinks, registrationLink];
-
 export default function ThanhDieuHuong() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,44 +101,32 @@ export default function ThanhDieuHuong() {
           })}
         </nav>
 
-        {/* CỤM NÚT ĐĂNG KÝ & NÚT 3 GẠCH */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Nút Đăng Ký với hiệu ứng Shimmer */}
-          <Link
-            href={registrationLink.href}
-            className="whitespace-nowrap px-4 py-2.5 lg:py-2 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold transition-colors"
-          >
-            <span className="relative z-10">Đăng ký</span>
-          </Link>
-
-          {/* Nút Hamburger cho Mobile */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
-            aria-expanded={menuOpen}
-            aria-controls="menu-di-dong"
-            className="lg:hidden p-2.5 rounded-full text-body-ink hover:text-brand-ink hover:bg-white border border-slate-200/80 focus-visible:outline-2 focus-visible:outline-sky-600 transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
-          >
-            <div className="w-5 h-4 flex flex-col justify-between items-center relative">
-              <span
-                className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform ${
-                  menuOpen ? 'rotate-45 translate-y-1.5' : ''
-                }`}
-              />
-              <span
-                className={`w-5 h-0.5 bg-current rounded-full transition-opacity duration-300 ${
-                  menuOpen ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-              <span
-                className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform ${
-                  menuOpen ? '-rotate-45 -translate-y-2' : ''
-                }`}
-              />
-            </div>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+          aria-expanded={menuOpen}
+          aria-controls="menu-di-dong"
+          className="lg:hidden p-2.5 rounded-full text-body-ink hover:text-brand-ink hover:bg-white border border-slate-200/80 focus-visible:outline-2 focus-visible:outline-sky-600 transition-all active:scale-90 z-50 bg-white/70 backdrop-blur-sm"
+        >
+          <div className="w-5 h-4 flex flex-col justify-between items-center relative">
+            <span
+              className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform ${
+                menuOpen ? 'rotate-45 translate-y-1.5' : ''
+              }`}
+            />
+            <span
+              className={`w-5 h-0.5 bg-current rounded-full transition-opacity duration-300 ${
+                menuOpen ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+            <span
+              className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform ${
+                menuOpen ? '-rotate-45 -translate-y-2' : ''
+              }`}
+            />
+          </div>
+        </button>
 
       </div>
 
@@ -165,7 +150,7 @@ export default function ThanhDieuHuong() {
       >
         <div className="flex flex-col h-full justify-between px-6 py-6 overflow-y-auto">
           <nav className="flex flex-col space-y-2">
-            {mobileLinks.map((link, idx) => {
+            {navLinks.map((link, idx) => {
               const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
               return (
                 <Link
