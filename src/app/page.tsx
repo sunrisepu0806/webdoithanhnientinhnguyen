@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 interface Ripple {
   id: number;
   x: number;
@@ -314,10 +315,10 @@ export default function TrangChu() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
               <Link
                 href="/tracuu"
-                className="relative group overflow-hidden px-6 sm:px-8 py-3 rounded-sm bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-105 transition-all duration-200 active:scale-95"
+                className="group inline-flex min-h-11 items-center gap-3 rounded-md bg-sky-600 px-5 text-sm font-semibold text-white shadow-sm shadow-sky-700/20 transition-colors hover:bg-sky-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600 active:bg-sky-800"
               >
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent ease-out" />
-                <span className="relative z-10">Tra cứu sinh viên</span>
+                Tra cứu sinh viên
+                <ArrowRight size={17} aria-hidden="true" className="motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
