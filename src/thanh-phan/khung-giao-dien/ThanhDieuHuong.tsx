@@ -56,7 +56,7 @@ export default function ThanhDieuHuong() {
       className={`w-full sticky top-0 z-50 select-none transition-all duration-300 ${
         isScrolled
           ? 'bg-white/90 backdrop-blur-md shadow-md shadow-sky-950/5 border-b border-sky-100/80'
-          : 'bg-[#f8fdfd]/95 backdrop-blur-sm border-b border-sky-100/50'
+          : 'bg-[#f8fbff]/95 backdrop-blur-sm border-b border-sky-100/50'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 h-20 lg:h-16 flex items-center justify-between lg:justify-start lg:gap-7">
@@ -91,7 +91,7 @@ export default function ThanhDieuHuong() {
                 aria-current={isActive ? 'page' : undefined}
                 className={`flex items-center whitespace-nowrap border-b-2 pt-0.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-sky-600 ${
                   isActive
-                    ? 'border-sky-600 text-brand-ink'
+                    ? 'border-sky-500 text-brand-ink'
                     : 'border-transparent text-muted-ink hover:border-sky-300 hover:text-brand-ink'
                 }`}
               >

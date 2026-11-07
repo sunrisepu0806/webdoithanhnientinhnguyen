@@ -7,23 +7,23 @@
 @import "@fontsource/be-vietnam-pro/900.css";
 
 @theme {
-  --color-sky-50: #effbfc;
-  --color-sky-100: #d4f2f4;
-  --color-sky-200: #a6e4e8;
-  --color-sky-300: #73d0d9;
-  --color-sky-400: #39b4c4;
-  --color-sky-500: #168e9f;
-  --color-sky-600: #087787;
-  --color-sky-700: #066878;
-  --color-sky-800: #105460;
-  --color-sky-900: #123f49;
-  --color-brand-ink: #077385;
-  --color-brand-strong: #085565;
-  --color-ink: #14343c;
+  --color-sky-50: #f1f8ff;
+  --color-sky-100: #dceeff;
+  --color-sky-200: #b9deff;
+  --color-sky-300: #81c5ff;
+  --color-sky-400: #46aaff;
+  --color-sky-500: #218bef;
+  --color-sky-600: #1074d4;
+  --color-sky-700: #126bc5;
+  --color-sky-800: #125aa7;
+  --color-sky-900: #174b80;
+  --color-brand-ink: #126dc8;
+  --color-brand-strong: #155baa;
+  --color-ink: #183650;
   --color-body-ink: #344b60;
   --color-muted-ink: #536879;
   --color-inverse-muted: #c3d5e5;
-  --color-inverse-link: #93e1e6;
+  --color-inverse-link: #b6e0ff;
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
   --font-mono: var(--font-sans);
 }
@@ -33,13 +33,13 @@ body { font-family: var(--font-sans); }
 /* 1. KHÓA CHẶT CHẾ ĐỘ SÁNG TOÀN DIỆN */
 :root {
   color-scheme: light !important;
-  --background: #f3fafb;
+  --background: #f5faff;
   --foreground: var(--color-body-ink);
 }
 
 html,
 body {
-  background-color: #f3fafb !important;
+  background-color: #f5faff !important;
   color: var(--foreground);
   color-scheme: light !important;
   overflow-x: hidden;
@@ -52,7 +52,7 @@ body {
   }
   html,
   body {
-    background-color: #f3fafb !important;
+    background-color: #f5faff !important;
     color: var(--foreground);
   }
 }
