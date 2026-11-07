@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Mail, Phone, ChevronRight } from 'lucide-react';
+import { MapPin, Mail, ChevronRight } from 'lucide-react';
 
 const quickLinks = [
   { name: 'Trang chủ', href: '/' },
@@ -81,15 +81,6 @@ export default function ChanTrang() {
                   className="hover:text-blue-300 transition-colors truncate"
                 >
                   doitntnqnu2023@gmail.com
-                </a>
-              </p>
-              <p className="flex items-center gap-2.5">
-                <Phone size={16} className="text-blue-400 shrink-0" />
-                <a
-                  href="tel:0376217236"
-                  className="hover:text-blue-300 transition-colors"
-                >
-                  0376217236 (Đỗ Minh Tú)
                 </a>
               </p>
             </div>
